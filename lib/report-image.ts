@@ -3,6 +3,14 @@ import { ensurePublicReportDir, getClassImagePath } from "./storage";
 import { getAttentionStyle, getStatusStyle } from "./status";
 import type { ClassReport, ReportData, Status } from "./types";
 
+const LINUX_BROWSER_CANDIDATES = [
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+  "/snap/bin/chromium"
+];
+
 const WINDOWS_BROWSER_CANDIDATES = [
   "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
   "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
@@ -15,7 +23,11 @@ function getBrowserExecutablePath(): string | undefined {
     return process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
   }
 
-  return WINDOWS_BROWSER_CANDIDATES.find((candidate) => existsSync(candidate));
+  const candidates = process.platform === "win32"
+    ? WINDOWS_BROWSER_CANDIDATES
+    : [...LINUX_BROWSER_CANDIDATES, ...WINDOWS_BROWSER_CANDIDATES];
+
+  return candidates.find((candidate) => existsSync(candidate));
 }
 
 function escapeHtml(value: unknown): string {

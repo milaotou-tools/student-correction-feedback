@@ -1,0 +1,57 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: aliyun-deploy-main
+  cancel-in-progress: true
+
+env:
+  APP_NAME: student-correction-feedback
+  REPO_URL: https://github.com/milaotou-tools/student-correction-feedback.git
+  BRANCH: main
+  DEPLOY_PATH: /www/wwwroot/student-correction-feedback
+  PM2_NAME: student-correction-feedback
+  APP_PORT: "3001"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ALIYUN_SSH_KEY }}
+
+      - name: Trust server host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.ALIYUN_PORT || 22 }}" -H "${{ secrets.ALIYUN_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy on Aliyun
+        run: |
+          ssh -p "${{ secrets.ALIYUN_PORT || 22 }}" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' bash -s" <<'EOF'
+          set -euo pipefail
+
+          mkdir -p "$DEPLOY_PATH"
+          cd "$DEPLOY_PATH"
+
+          if [ ! -d ".git" ]; then
+            if [ -n "$(ls -A . 2>/dev/null)" ]; then
+              echo "[deploy] first deploy path is not empty: $DEPLOY_PATH"
+              exit 1
+            fi
+            echo "[deploy] first deploy: cloning repository"
+            git clone -b "$BRANCH" "$REPO_URL" .
+          fi
+
+          chmod +x deploy.sh
+          ./deploy.sh
+          EOF
