@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { CopyButton } from "./CopyButton";
 import type { FollowUpStudent } from "@/lib/types";
+import { withAppBasePath } from "@/lib/app-path";
 
 type FollowUpGroup = {
   reminder: string;
@@ -39,7 +40,7 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/reports/${reportId}/follow-up`, {
+      const response = await fetch(withAppBasePath(`/api/reports/${reportId}/follow-up`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password })

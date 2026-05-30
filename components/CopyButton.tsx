@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { withAppBasePath } from "@/lib/app-path";
 
 type CopyButtonProps = {
   text: string;
@@ -18,7 +19,7 @@ export function CopyButton({ text, label = "复制", copiedLabel = "已复制", 
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
-      const response = await fetch("/api/copy-text", {
+      const response = await fetch(withAppBasePath("/api/copy-text"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })

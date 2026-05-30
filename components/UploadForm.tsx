@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { withAppBasePath } from "@/lib/app-path";
 
 export function UploadForm() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export function UploadForm() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/reports", {
+      const response = await fetch(withAppBasePath("/api/reports"), {
         method: "POST",
         body: formData
       });
