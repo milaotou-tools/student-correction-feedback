@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { withAppBasePath } from "@/lib/app-path";
 
 type CopyButtonProps = {
   text: string;
@@ -10,27 +9,42 @@ type CopyButtonProps = {
   className?: string;
 };
 
+function copyWithTextarea(value: string) {
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  const success = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  return success;
+}
+
 export function CopyButton({ text, label = "复制", copiedLabel = "已复制", className = "" }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      const response = await fetch(withAppBasePath("/api/copy-text"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      const result = (await response.json()) as { ok?: boolean; error?: string };
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "复制失败，请手动复制。");
-      }
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+    const canUseClipboardApi =
+      typeof navigator !== "undefined" &&
+      typeof navigator.clipboard?.writeText === "function" &&
+      window.isSecureContext;
+
+    const copiedSuccessfully = canUseClipboardApi
+      ? await navigator.clipboard.writeText(text).then(() => true).catch(() => false)
+      : copyWithTextarea(text);
+
+    if (!copiedSuccessfully) {
+      throw new Error("复制失败，请手动复制");
     }
+
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
   }
 
   return (
