@@ -40,7 +40,43 @@ else
 fi
 
 echo "[deploy] installing Playwright Chromium"
-npx playwright install-deps chromium
+if command -v dnf >/dev/null 2>&1; then
+  sudo dnf install -y \
+    atk \
+    at-spi2-atk \
+    at-spi2-core \
+    cairo \
+    cups-libs \
+    dbus-libs \
+    fontconfig \
+    freetype \
+    glib2 \
+    gtk3 \
+    libdrm \
+    libX11 \
+    libX11-xcb \
+    libXcomposite \
+    libXcursor \
+    libXdamage \
+    libXext \
+    libXfixes \
+    libXi \
+    libXrandr \
+    libXrender \
+    libXScrnSaver \
+    libXtst \
+    libxcb \
+    libxkbcommon \
+    libxshmfence \
+    nspr \
+    nss \
+    pango \
+    alsa-lib \
+    mesa-libgbm \
+    xdg-utils
+else
+  npx playwright install-deps chromium
+fi
 npx playwright install chromium
 
 echo "[deploy] building"
