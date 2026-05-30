@@ -12,6 +12,7 @@ echo "[deploy] app=${APP_NAME} branch=${BRANCH} path=${DEPLOY_PATH} port=${APP_P
 
 mkdir -p "$DEPLOY_PATH"
 cd "$DEPLOY_PATH"
+git config --global --add safe.directory "$DEPLOY_PATH" >/dev/null 2>&1 || true
 
 if [ ! -d ".git" ]; then
   if [ -n "$(ls -A . 2>/dev/null)" ]; then
