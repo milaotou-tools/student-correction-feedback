@@ -39,6 +39,7 @@ else
 fi
 
 echo "[deploy] installing Playwright Chromium"
+npx playwright install-deps chromium
 npx playwright install chromium
 
 echo "[deploy] building"
