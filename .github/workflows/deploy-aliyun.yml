@@ -12,7 +12,7 @@ concurrency:
 
 env:
   APP_NAME: student-correction-feedback
-  REPO_URL: git@github.com:milaotou-tools/student-correction-feedback.git
+  REPO_URL: https://github.com/milaotou-tools/student-correction-feedback.git
   BRANCH: main
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
@@ -41,14 +41,18 @@ jobs:
       - name: Deploy on Aliyun
         env:
           ALIYUN_PORT: ${{ secrets.ALIYUN_PORT }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           SSH_PORT="${ALIYUN_PORT:-22}"
-          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' bash -s" <<'EOF'
+          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' GITHUB_TOKEN='${GITHUB_TOKEN}' bash -s" <<'EOF'
           set -euo pipefail
 
           mkdir -p "$DEPLOY_PATH"
           cd "$DEPLOY_PATH"
           git config --global --add safe.directory "$DEPLOY_PATH" >/dev/null 2>&1 || true
+          if [ -n "${GITHUB_TOKEN:-}" ]; then
+            git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+          fi
 
           if [ ! -d ".git" ]; then
             if [ -n "$(ls -A . 2>/dev/null)" ]; then

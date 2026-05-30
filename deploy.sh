@@ -2,11 +2,12 @@
 set -euo pipefail
 
 APP_NAME="${APP_NAME:-student-correction-feedback}"
-REPO_URL="${REPO_URL:-git@github.com:milaotou-tools/student-correction-feedback.git}"
+REPO_URL="${REPO_URL:-https://github.com/milaotou-tools/student-correction-feedback.git}"
 BRANCH="${BRANCH:-main}"
 DEPLOY_PATH="${DEPLOY_PATH:-/www/wwwroot/student-correction-feedback}"
 PM2_NAME="${PM2_NAME:-student-correction-feedback}"
 APP_PORT="${APP_PORT:-3002}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 
 echo "[deploy] app=${APP_NAME} branch=${BRANCH} path=${DEPLOY_PATH} port=${APP_PORT}"
 
@@ -14,8 +15,10 @@ mkdir -p "$DEPLOY_PATH"
 cd "$DEPLOY_PATH"
 git config --global --add safe.directory "$DEPLOY_PATH" >/dev/null 2>&1 || true
 sudo chown -R "$(id -un)":"$(id -gn)" "$DEPLOY_PATH" >/dev/null 2>&1 || true
-mkdir -p "$HOME/.ssh"
-ssh-keyscan -H github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+
+if [ -n "$GITHUB_TOKEN" ]; then
+  git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+fi
 
 if [ ! -d ".git" ]; then
   if [ -n "$(ls -A . 2>/dev/null)" ]; then
