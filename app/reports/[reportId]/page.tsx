@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { getGroupMessage } from "@/lib/report-utils";
-import { getClassImageUrl, readReportData } from "@/lib/storage";
+import { getClassDownloadUrl, getClassImageUrl, readReportData } from "@/lib/storage";
 
 type ReportPageProps = {
   params: Promise<{ reportId: string }>;
@@ -50,8 +50,7 @@ export default async function ReportPage({ params }: ReportPageProps) {
                     <p className="mt-1 text-sm text-slate-500">共 {classReport.students.length} 名学生</p>
                   </div>
                   <a
-                    href={imageUrl}
-                    download
+                    href={getClassDownloadUrl(reportId, classReport.className, index)}
                     className="focus-ring rounded-md bg-[#2F4F68] px-4 py-2 text-sm font-bold text-white hover:bg-[#263f53]"
                   >
                     下载 {classReport.className}反馈图

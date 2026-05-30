@@ -42,6 +42,10 @@ export function getClassImageUrl(reportId: string, className: string, index: num
   return withAppBasePath(`/api/reports/${reportId}/image/${getClassImageFileName(className, index)}`);
 }
 
+export function getClassDownloadUrl(reportId: string, className: string, index: number): string {
+  return withAppBasePath(`/api/reports/${reportId}/download/${getClassImageFileName(className, index)}`);
+}
+
 export function getReportImagePath(reportId: string, fileName: string): string {
   return path.join(getPublicReportDir(reportId), fileName);
 }
