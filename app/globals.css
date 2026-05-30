@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: #f7f9fc;
+  color: #1f2937;
+  font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(47, 79, 104, 0.22);
+}
