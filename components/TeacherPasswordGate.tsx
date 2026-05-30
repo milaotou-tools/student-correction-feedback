@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { CopyButton } from "./CopyButton";
 import type { FollowUpStudent } from "@/lib/types";
 import { withAppBasePath } from "@/lib/app-path";
 
@@ -107,15 +106,9 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-slate-700">{group.reminder}</p>
                       <p className="mt-2 text-sm leading-6 text-slate-500">
-                        群发对象：
-                        {group.students.map((student) => `${student.className}${student.name}`).join("、")}
+                        群发对象：{group.students.map((student) => `${student.className}${student.name}`).join("、")}
                       </p>
                     </div>
-                    <CopyButton
-                      text={group.reminder}
-                      label="复制本组话术"
-                      className="focus-ring shrink-0 rounded-md bg-[#2F4F68] px-4 py-2 text-sm font-bold text-white hover:bg-[#263f53]"
-                    />
                   </div>
                 </div>
                 <div className="overflow-x-auto">

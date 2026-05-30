@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CopyButton } from "@/components/CopyButton";
 import { getGroupMessage } from "@/lib/report-utils";
 import { getClassDownloadUrl, getClassImageUrl, readReportData } from "@/lib/storage";
 
@@ -25,7 +24,10 @@ export default async function ReportPage({ params }: ReportPageProps) {
               {reportData.weekLabel}｜日期范围：{reportData.dateRange}
             </p>
           </div>
-          <Link href={`/teacher/${reportId}/follow-up`} className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
+          <Link
+            href={`/teacher/${reportId}/follow-up`}
+            className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]"
+          >
             进入教师跟进页
             <span className="ml-2 font-normal text-slate-500">仅教师本人查看</span>
           </Link>
@@ -58,18 +60,15 @@ export default async function ReportPage({ params }: ReportPageProps) {
                 </div>
 
                 <div className="max-h-[640px] overflow-auto rounded-md border border-[#D0D7DE] bg-[#F7F9FC] p-3">
-                  <img src={imageUrl} alt={`${classReport.className}反馈图预览`} className="w-full min-w-[720px] rounded-sm shadow-sm" />
+                  <img
+                    src={imageUrl}
+                    alt={`${classReport.className}反馈图预览`}
+                    className="w-full min-w-[720px] rounded-sm shadow-sm"
+                  />
                 </div>
 
                 <div className="mt-4 rounded-md border border-[#D0D7DE] bg-[#F7F9FC] p-4">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <h3 className="font-bold text-slate-800">{classReport.className}建议发群文案</h3>
-                    <CopyButton
-                      text={groupMessage}
-                      label="复制发群文案"
-                      className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-3 py-2 text-xs font-bold text-[#2F4F68] hover:bg-white"
-                    />
-                  </div>
+                  <h3 className="mb-2 font-bold text-slate-800">{classReport.className}建议发群文案</h3>
                   <p className="text-sm leading-6 text-slate-600">{groupMessage}</p>
                 </div>
               </section>
