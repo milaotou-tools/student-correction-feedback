@@ -42,7 +42,7 @@ fi
 
 echo "[deploy] installing Playwright Chromium"
 if command -v dnf >/dev/null 2>&1; then
-  sudo dnf install -y \
+  if ! sudo dnf install -y --setopt=install_weak_deps=False --nobest --skip-broken \
     atk \
     at-spi2-atk \
     at-spi2-core \
@@ -74,7 +74,9 @@ if command -v dnf >/dev/null 2>&1; then
     pango \
     alsa-lib \
     mesa-libgbm \
-    xdg-utils
+    xdg-utils; then
+    echo "[deploy] warning: dnf dependency install returned non-zero; continuing"
+  fi
 else
   npx playwright install-deps chromium
 fi
