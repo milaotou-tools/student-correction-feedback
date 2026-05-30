@@ -15,7 +15,7 @@ export default async function ReportPage({ params }: ReportPageProps) {
   const groupMessage = getGroupMessage();
 
   return (
-    <main className="min-h-screen bg-[#F7F9FC] px-5 py-8">
+    <main className="min-h-screen bg-[#F7F9FC] px-4 py-6 sm:px-5 sm:py-8">
       <section className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 border-b border-[#D0D7DE] pb-5 md:flex-row md:items-end md:justify-between">
           <div>
@@ -45,7 +45,10 @@ export default async function ReportPage({ params }: ReportPageProps) {
           {reportData.classes.map((classReport, index) => {
             const imageUrl = getClassImageUrl(reportId, classReport.className, index);
             return (
-              <section key={classReport.className} className="rounded-md border border-[#D0D7DE] bg-white p-5 shadow-sm">
+              <section
+                key={classReport.className}
+                className="rounded-md border border-[#D0D7DE] bg-white p-4 shadow-sm sm:p-5"
+              >
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="text-xl font-extrabold text-slate-800">{classReport.className}反馈图</h2>
@@ -59,11 +62,13 @@ export default async function ReportPage({ params }: ReportPageProps) {
                   </a>
                 </div>
 
-                <div className="max-h-[640px] overflow-auto rounded-md border border-[#D0D7DE] bg-[#F7F9FC] p-3">
+                <div className="rounded-md border border-[#D0D7DE] bg-[#F7F9FC] p-2 sm:p-3">
                   <img
                     src={imageUrl}
                     alt={`${classReport.className}反馈图预览`}
-                    className="w-full min-w-[720px] rounded-sm shadow-sm"
+                    className="block h-auto w-full rounded-sm shadow-sm"
+                    loading="eager"
+                    decoding="async"
                   />
                 </div>
 
