@@ -74,9 +74,11 @@ if command -v dnf >/dev/null 2>&1; then
     pango \
     alsa-lib \
     mesa-libgbm \
-    xdg-utils; then
+    xdg-utils \
+    google-noto-sans-cjk-ttc-fonts; then
     echo "[deploy] warning: dnf dependency install returned non-zero; continuing"
   fi
+  fc-cache -f >/dev/null 2>&1 || true
 else
   npx playwright install-deps chromium
 fi

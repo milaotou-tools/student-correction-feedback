@@ -87,7 +87,9 @@ export function renderFeedbackHtml(reportData: ReportData, classReport: ClassRep
           margin: 0;
           background: #F7F9FC;
           color: #1f2937;
-          font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+          font-family: "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Micro Hei", "Microsoft YaHei", Arial, "PingFang SC", sans-serif;
+          font-synthesis: none;
+          text-rendering: optimizeLegibility;
         }
         #report-root {
           width: 1600px;
