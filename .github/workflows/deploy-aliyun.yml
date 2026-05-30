@@ -31,13 +31,19 @@ jobs:
           ssh-private-key: ${{ secrets.ALIYUN_SSH_KEY }}
 
       - name: Trust server host key
+        env:
+          ALIYUN_PORT: ${{ secrets.ALIYUN_PORT }}
         run: |
+          SSH_PORT="${ALIYUN_PORT:-22}"
           mkdir -p ~/.ssh
-          ssh-keyscan -p "${{ secrets.ALIYUN_PORT || 22 }}" -H "${{ secrets.ALIYUN_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.ALIYUN_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Deploy on Aliyun
+        env:
+          ALIYUN_PORT: ${{ secrets.ALIYUN_PORT }}
         run: |
-          ssh -p "${{ secrets.ALIYUN_PORT || 22 }}" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' bash -s" <<'EOF'
+          SSH_PORT="${ALIYUN_PORT:-22}"
+          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' bash -s" <<'EOF'
           set -euo pipefail
 
           mkdir -p "$DEPLOY_PATH"
