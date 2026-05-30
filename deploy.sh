@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="${APP_NAME:-student-correction-feedback}"
-REPO_URL="${REPO_URL:-https://github.com/milaotou-tools/student-correction-feedback.git}"
+REPO_URL="${REPO_URL:-git@github.com:milaotou-tools/student-correction-feedback.git}"
 BRANCH="${BRANCH:-main}"
 DEPLOY_PATH="${DEPLOY_PATH:-/www/wwwroot/student-correction-feedback}"
 PM2_NAME="${PM2_NAME:-student-correction-feedback}"
@@ -14,6 +14,8 @@ mkdir -p "$DEPLOY_PATH"
 cd "$DEPLOY_PATH"
 git config --global --add safe.directory "$DEPLOY_PATH" >/dev/null 2>&1 || true
 sudo chown -R "$(id -un)":"$(id -gn)" "$DEPLOY_PATH" >/dev/null 2>&1 || true
+mkdir -p "$HOME/.ssh"
+ssh-keyscan -H github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
 
 if [ ! -d ".git" ]; then
   if [ -n "$(ls -A . 2>/dev/null)" ]; then
@@ -24,6 +26,7 @@ if [ ! -d ".git" ]; then
   git clone -b "$BRANCH" "$REPO_URL" .
 else
   echo "[deploy] updating existing checkout"
+  git remote set-url origin "$REPO_URL"
   git fetch origin "$BRANCH"
   git reset --hard "origin/$BRANCH"
   git clean -fd

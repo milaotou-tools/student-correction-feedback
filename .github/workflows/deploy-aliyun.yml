@@ -12,7 +12,7 @@ concurrency:
 
 env:
   APP_NAME: student-correction-feedback
-  REPO_URL: https://github.com/milaotou-tools/student-correction-feedback.git
+  REPO_URL: git@github.com:milaotou-tools/student-correction-feedback.git
   BRANCH: main
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
