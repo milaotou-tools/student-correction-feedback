@@ -16,7 +16,7 @@ env:
   BRANCH: main
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
-  APP_PORT: "3001"
+  APP_PORT: "3002"
 
 jobs:
   deploy:

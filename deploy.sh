@@ -6,7 +6,7 @@ REPO_URL="${REPO_URL:-https://github.com/milaotou-tools/student-correction-feedb
 BRANCH="${BRANCH:-main}"
 DEPLOY_PATH="${DEPLOY_PATH:-/www/wwwroot/student-correction-feedback}"
 PM2_NAME="${PM2_NAME:-student-correction-feedback}"
-APP_PORT="${APP_PORT:-3001}"
+APP_PORT="${APP_PORT:-3002}"
 
 echo "[deploy] app=${APP_NAME} branch=${BRANCH} path=${DEPLOY_PATH} port=${APP_PORT}"
 
