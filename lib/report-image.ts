@@ -140,14 +140,11 @@ export function renderFeedbackHtml(reportData: ReportData, classReport: ClassRep
           color: #213547;
           font-weight: 800;
         }
-        .id-cell, .name-cell {
+        .id-cell, .name-cell, .attention-cell {
           background: #F3F6FA;
           font-weight: 600;
         }
-        .attention-cell {
-          background: #fff;
-          padding: 4px 8px;
-        }
+        .attention-cell { padding: 4px 8px; }
         .attention-badge {
           display: inline-flex;
           min-width: 96px;
