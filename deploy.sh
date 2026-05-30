@@ -28,6 +28,10 @@ else
 fi
 
 echo "[deploy] installing dependencies"
+NPM_CACHE_DIR="${NPM_CACHE_DIR:-$HOME/.npm-cache}"
+mkdir -p "$NPM_CACHE_DIR"
+export npm_config_cache="$NPM_CACHE_DIR"
+
 if [ -f package-lock.json ]; then
   npm ci
 else
