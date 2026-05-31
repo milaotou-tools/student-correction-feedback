@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { UploadForm } from "@/components/UploadForm";
 
 export default function UploadPage() {
@@ -22,6 +23,14 @@ export default function UploadPage() {
               <li>状态支持：满分、已订正、已交、未交。</li>
               <li>系统会自动忽略空白行，并提示未知状态。</li>
             </ul>
+            <div className="mt-6 space-y-3 border-t border-[#D0D7DE] pt-4">
+              <Link href="/" className="block text-sm font-bold text-[#2F4F68] hover:underline">
+                返回工具台
+              </Link>
+              <Link href="/grade-upload" className="block text-sm font-bold text-[#2F4F68] hover:underline">
+                切换到成绩分析报告
+              </Link>
+            </div>
           </aside>
         </div>
       </section>

@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
 import { NextResponse } from "next/server";
-import { getLegacyReportImagePath, getReportImagePath } from "@/lib/storage";
+import { renderFeedbackSvg } from "@/lib/report-image";
+import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -16,24 +16,30 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid file name" }, { status: 400 });
   }
 
-  const candidates = [
-    getReportImagePath(reportId, safeFile),
-    getLegacyReportImagePath(reportId, safeFile)
-  ];
+  if (safeFile.toLowerCase().endsWith(".svg")) {
+    const reportData = await readReportData(reportId).catch(() => null);
+    const classReport = reportData?.classes.find((item, index) => getClassImageFileName(item.className, index) === safeFile);
 
-  for (const imagePath of candidates) {
-    try {
-      const image = await fs.readFile(imagePath);
-      return new NextResponse(image, {
+    if (reportData && classReport) {
+      return new NextResponse(renderFeedbackSvg(reportData, classReport), {
         headers: {
-          "Content-Type": "image/png",
+          "Content-Type": "image/svg+xml; charset=utf-8",
           "Content-Disposition": `attachment; filename="${safeFile}"`,
           "Cache-Control": "no-store"
         }
       });
-    } catch {
-      // try next location
     }
+  }
+
+  const image = await readReportImage(reportId, safeFile);
+  if (image) {
+    return new NextResponse(new Uint8Array(image), {
+      headers: {
+        "Content-Type": getReportImageContentType(safeFile),
+        "Content-Disposition": `attachment; filename="${safeFile}"`,
+        "Cache-Control": "no-store"
+      }
+    });
   }
 
   return NextResponse.json({ error: "Image not found" }, { status: 404 });

@@ -1,225 +1,128 @@
-import { existsSync } from "fs";
-import { ensurePublicReportDir, getClassImagePath } from "./storage";
+import { getClassImageFileName, saveReportImage } from "./storage";
 import { getAttentionStyle, getStatusStyle } from "./status";
 import type { ClassReport, ReportData, Status } from "./types";
 
-const LINUX_BROWSER_CANDIDATES = [
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/snap/bin/chromium"
-];
+const REPORT_WIDTH = 1600;
+const PADDING_X = 36;
+const TABLE_X = 36;
+const TABLE_Y = 150;
+const TABLE_WIDTH = REPORT_WIDTH - PADDING_X * 2;
+const HEADER_HEIGHT = 44;
+const ROW_HEIGHT = 44;
+const FOOTER_GAP = 14;
+const FOOTER_HEIGHT = 68;
+const ID_WIDTH = 118;
+const NAME_WIDTH = 170;
+const ATTENTION_WIDTH = 190;
+const FONT_FAMILY = "Noto Sans SC, Microsoft YaHei, PingFang SC, Arial, sans-serif";
 
-const WINDOWS_BROWSER_CANDIDATES = [
-  "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-];
-
-function getBrowserExecutablePath(): string | undefined {
-  if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE && existsSync(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE)) {
-    return process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
-  }
-
-  const candidates = process.platform === "win32"
-    ? WINDOWS_BROWSER_CANDIDATES
-    : [...LINUX_BROWSER_CANDIDATES, ...WINDOWS_BROWSER_CANDIDATES];
-
-  return candidates.find((candidate) => existsSync(candidate));
-}
-
-function escapeHtml(value: unknown): string {
+function escapeXml(value: unknown): string {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll("'", "&apos;");
 }
 
-function styleText(style: Record<string, string | number | undefined>): string {
-  return Object.entries(style)
-    .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join("; ");
+function text(x: number, y: number, value: unknown, options: { size: number; weight?: number; fill?: string; anchor?: string }):
+string {
+  const weight = options.weight ?? 400;
+  const fill = options.fill ?? "#1f2937";
+  const anchor = options.anchor ?? "middle";
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${FONT_FAMILY}" font-size="${options.size}" font-weight="${weight}" fill="${fill}">${escapeXml(value)}</text>`;
 }
 
-function renderAttentionBadge(level: ClassReport["students"][number]["attentionLevel"]): string {
-  const style = getAttentionStyle(level);
-  return `<span class="attention-badge" style="${styleText({
-    "background-color": style.background,
-    color: style.color,
-    border: `2px solid ${style.border}`,
-    "font-weight": style.fontWeight
-  })}">${escapeHtml(level)}</span>`;
+function rect(x: number, y: number, width: number, height: number, fill: string, stroke = "#D0D7DE", rx = 0): string {
+  return `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${fill}" stroke="${stroke}" stroke-width="1"${rx ? ` rx="${rx}" ry="${rx}"` : ""}/>`;
 }
 
-function renderStatusCell(status: Status): string {
+function renderStatusCell(status: Status, x: number, y: number, width: number): string {
   const style = getStatusStyle(status);
-  return `<td class="status-cell" style="${styleText({
-    "background-color": style.background,
-    color: style.color,
-    "font-weight": style.fontWeight
-  })}">${escapeHtml(status)}</td>`;
+  return [
+    rect(x, y, width, ROW_HEIGHT, style.background),
+    text(x + width / 2, y + 28, status, {
+      size: 17,
+      weight: style.fontWeight ?? 600,
+      fill: style.color
+    })
+  ].join("");
 }
 
-export function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport): string {
-  const rows = classReport.students
-    .map(
-      (student) => `<tr>
-        <td class="id-cell">${escapeHtml(student.studentId)}</td>
-        <td class="name-cell">${escapeHtml(student.name)}</td>
-        <td class="attention-cell">${renderAttentionBadge(student.attentionLevel)}</td>
-        ${reportData.dates.map((date) => renderStatusCell(student.statuses[date] ?? "")).join("")}
-      </tr>`
+function renderAttentionBadge(level: ClassReport["students"][number]["attentionLevel"], x: number, y: number): string {
+  const style = getAttentionStyle(level);
+  const badgeWidth = 96;
+  const badgeHeight = 28;
+  const badgeX = x + (ATTENTION_WIDTH - badgeWidth) / 2;
+  const badgeY = y + (ROW_HEIGHT - badgeHeight) / 2;
+
+  return [
+    rect(badgeX, badgeY, badgeWidth, badgeHeight, style.background, style.border ?? "#C8C8C8", 14),
+    text(badgeX + badgeWidth / 2, badgeY + 20, level, {
+      size: 15,
+      weight: style.fontWeight ?? 700,
+      fill: style.color
+    })
+  ].join("");
+}
+
+function renderHeaderCell(label: string, x: number, y: number, width: number): string {
+  return [
+    rect(x, y, width, HEADER_HEIGHT, "#D9EAF7"),
+    text(x + width / 2, y + 29, label, { size: 17, weight: 800, fill: "#213547" })
+  ].join("");
+}
+
+export function renderFeedbackSvg(reportData: ReportData, classReport: ClassReport): string {
+  const dateWidth = (TABLE_WIDTH - ID_WIDTH - NAME_WIDTH - ATTENTION_WIDTH) / reportData.dates.length;
+  const tableHeight = HEADER_HEIGHT + classReport.students.length * ROW_HEIGHT;
+  const footerY = TABLE_Y + tableHeight + FOOTER_GAP;
+  const reportHeight = footerY + FOOTER_HEIGHT + 34;
+  const titleCenterX = REPORT_WIDTH / 2;
+  const footerText = "说明：“满分”表示当天完成质量较好；“已订正”表示已完成错题订正；“已交”表示已提交但仍需确认订正情况；“未交”表示需要尽快补齐。";
+
+  const header = [
+    renderHeaderCell("学号", TABLE_X, TABLE_Y, ID_WIDTH),
+    renderHeaderCell("姓名", TABLE_X + ID_WIDTH, TABLE_Y, NAME_WIDTH),
+    renderHeaderCell("关注等级", TABLE_X + ID_WIDTH + NAME_WIDTH, TABLE_Y, ATTENTION_WIDTH),
+    ...reportData.dates.map((date, index) =>
+      renderHeaderCell(date, TABLE_X + ID_WIDTH + NAME_WIDTH + ATTENTION_WIDTH + dateWidth * index, TABLE_Y, dateWidth)
     )
+  ].join("");
+
+  const rows = classReport.students
+    .map((student, index) => {
+      const rowY = TABLE_Y + HEADER_HEIGHT + ROW_HEIGHT * index;
+      const statusStartX = TABLE_X + ID_WIDTH + NAME_WIDTH + ATTENTION_WIDTH;
+      return [
+        rect(TABLE_X, rowY, ID_WIDTH, ROW_HEIGHT, "#F3F6FA"),
+        text(TABLE_X + ID_WIDTH / 2, rowY + 28, student.studentId, { size: 17, weight: 600 }),
+        rect(TABLE_X + ID_WIDTH, rowY, NAME_WIDTH, ROW_HEIGHT, "#F3F6FA"),
+        text(TABLE_X + ID_WIDTH + NAME_WIDTH / 2, rowY + 28, student.name, { size: 17, weight: 600 }),
+        rect(TABLE_X + ID_WIDTH + NAME_WIDTH, rowY, ATTENTION_WIDTH, ROW_HEIGHT, "#F3F6FA"),
+        renderAttentionBadge(student.attentionLevel, TABLE_X + ID_WIDTH + NAME_WIDTH, rowY),
+        ...reportData.dates.map((date, dateIndex) =>
+          renderStatusCell(student.statuses[date] ?? "", statusStartX + dateWidth * dateIndex, rowY, dateWidth)
+        )
+      ].join("");
+    })
     .join("");
 
-  return `<!doctype html>
-  <html lang="zh-CN">
-    <head>
-      <meta charset="utf-8" />
-      <style>
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          background: #F7F9FC;
-          color: #1f2937;
-          font-family: "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Micro Hei", "Microsoft YaHei", Arial, "PingFang SC", sans-serif;
-          font-synthesis: none;
-          text-rendering: optimizeLegibility;
-        }
-        #report-root {
-          width: 1600px;
-          padding: 28px 36px 34px;
-          background: #F7F9FC;
-        }
-        .title {
-          text-align: center;
-          color: #203040;
-          margin-bottom: 14px;
-        }
-        .title h1 {
-          margin: 0 0 8px;
-          font-size: 34px;
-          line-height: 1.2;
-          font-weight: 800;
-          letter-spacing: 0;
-        }
-        .subtitle {
-          font-size: 19px;
-          color: #52616f;
-          line-height: 1.4;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          table-layout: fixed;
-          background: #fff;
-          border: 1px solid #D0D7DE;
-        }
-        col.id { width: 118px; }
-        col.name { width: 170px; }
-        col.attention { width: 190px; }
-        col.date { width: auto; }
-        th, td {
-          border: 1px solid #D0D7DE;
-          height: 44px;
-          padding: 6px 9px;
-          font-size: 17px;
-          line-height: 1.25;
-          text-align: center;
-          vertical-align: middle;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        th {
-          background: #D9EAF7;
-          color: #213547;
-          font-weight: 800;
-        }
-        .id-cell, .name-cell, .attention-cell {
-          background: #F3F6FA;
-          font-weight: 600;
-        }
-        .attention-cell { padding: 4px 8px; }
-        .attention-badge {
-          display: inline-flex;
-          min-width: 96px;
-          height: 28px;
-          align-items: center;
-          justify-content: center;
-          border-radius: 999px;
-          padding: 0 14px;
-          font-size: 15px;
-          line-height: 1;
-        }
-        .status-cell {
-          font-weight: 600;
-        }
-        .footer {
-          margin-top: 14px;
-          border: 1px solid #D0D7DE;
-          background: #FFFFFF;
-          padding: 12px 16px;
-          color: #4b5563;
-          font-size: 16px;
-          line-height: 1.7;
-        }
-      </style>
-    </head>
-    <body>
-      <main id="report-root">
-        <section class="title">
-          <h1>${escapeHtml(classReport.className)}学生一周订正情况反馈</h1>
-          <div class="subtitle">${escapeHtml(reportData.weekLabel)}计算练习订正情况｜日期范围：${escapeHtml(reportData.dateRange)}</div>
-        </section>
-        <table>
-          <colgroup>
-            <col class="id" />
-            <col class="name" />
-            <col class="attention" />
-            ${reportData.dates.map(() => '<col class="date" />').join("")}
-          </colgroup>
-          <thead>
-            <tr>
-              <th>学号</th>
-              <th>姓名</th>
-              <th>关注等级</th>
-              ${reportData.dates.map((date) => `<th>${escapeHtml(date)}</th>`).join("")}
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <footer class="footer">
-          说明：“满分”表示当天完成质量较好；“已订正”表示已完成错题订正；“已交”表示已提交但仍需确认订正情况；“未交”表示需要尽快补齐。
-        </footer>
-      </main>
-    </body>
-  </html>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${REPORT_WIDTH}" height="${reportHeight}" viewBox="0 0 ${REPORT_WIDTH} ${reportHeight}">
+  <rect width="100%" height="100%" fill="#F7F9FC"/>
+  ${text(titleCenterX, 64, `${classReport.className}学生一周订正情况反馈`, { size: 34, weight: 800, fill: "#203040" })}
+  ${text(titleCenterX, 104, `${reportData.weekLabel}计算练习订正情况 | 日期范围：${reportData.dateRange}`, { size: 19, fill: "#52616f" })}
+  ${header}
+  ${rows}
+  ${rect(TABLE_X, footerY, TABLE_WIDTH, FOOTER_HEIGHT, "#FFFFFF")}
+  ${text(TABLE_X + 16, footerY + 38, footerText, { size: 16, fill: "#4b5563", anchor: "start" })}
+</svg>`;
 }
 
 export async function generateFeedbackPng(reportData: ReportData, classReport: ClassReport, index: number): Promise<void> {
-  await ensurePublicReportDir(reportData.reportId);
-  const imagePath = getClassImagePath(reportData.reportId, classReport.className, index);
-  const { chromium } = await import("playwright");
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: getBrowserExecutablePath()
-  });
-
-  try {
-    const page = await browser.newPage({
-      viewport: { width: 1600, height: 1200 },
-      deviceScaleFactor: 2
-    });
-    await page.setContent(renderFeedbackHtml(reportData, classReport), { waitUntil: "networkidle" });
-    await page.locator("#report-root").screenshot({ path: imagePath });
-  } finally {
-    await browser.close();
-  }
+  const fileName = getClassImageFileName(classReport.className, index);
+  await saveReportImage(reportData.reportId, fileName, Buffer.from(renderFeedbackSvg(reportData, classReport), "utf8"));
 }
 
 export async function generateAllFeedbackPngs(reportData: ReportData): Promise<void> {
