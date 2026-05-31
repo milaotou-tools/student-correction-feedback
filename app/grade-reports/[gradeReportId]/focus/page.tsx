@@ -39,51 +39,66 @@ function formatClassCopyTextWithBackup(report: FocusClassReport): string {
   ].join("\n");
 }
 
-function FocusTable({ students, startIndex = 1 }: { students: FocusClassReport["students"]; startIndex?: number }) {
+function getLevelClassName(level: string): string {
+  if (level === "重点盯") return "bg-[#2F4F68] text-white";
+  if (level === "顺手关注") return "bg-[#E8F2F8] text-[#2F4F68]";
+  return "bg-[#F3F6FA] text-slate-600";
+}
+
+function FocusStudentList({ students, startIndex = 1 }: { students: FocusClassReport["students"]; startIndex?: number }) {
   return (
-    <div className="max-w-full overflow-x-auto">
-      <table className="w-full min-w-[1180px] border-collapse text-sm">
-        <thead>
-          <tr className="bg-[#F3F6FA] text-slate-800">
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">序号</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">关注层级</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">学号</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">姓名</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">本次成绩</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">基准分</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">排名变化</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">目标</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">入选依据</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">关注理由</th>
-            <th className="border border-[#D0D7DE] px-3 py-3 text-left">建议动作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((item, index) => (
-            <tr key={`${item.student.className}-${item.student.studentId}-${item.student.name}`} className="odd:bg-white even:bg-[#F7F9FC]">
-              <td className="border border-[#D0D7DE] px-3 py-3 font-bold">{startIndex + index}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3 font-bold text-[#2F4F68]">{item.level}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{item.student.studentId}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3 font-bold">{item.student.name}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{formatScore(item.student.currentScore)}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{formatScore(item.student.baselineScore)}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{formatRankChange(item.student.rankChange)}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3 text-[#2F4F68]">{item.targetType}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">
-                <div className="flex flex-wrap gap-1">
-                  {item.evidenceTags.map((tag) => (
-                    <span key={tag} className="rounded-md bg-[#EEF4F8] px-2 py-1 text-xs font-bold text-[#2F4F68]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{item.reason}</td>
-              <td className="border border-[#D0D7DE] px-3 py-3">{item.action}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="grid gap-3 p-4 lg:grid-cols-2">
+      {students.map((item, index) => (
+        <article key={`${item.student.className}-${item.student.studentId}-${item.student.name}`} className="rounded-md border border-[#D0D7DE] bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">#{startIndex + index}</span>
+                <span className={`rounded-md px-2 py-1 text-xs font-bold ${getLevelClassName(item.level)}`}>{item.level}</span>
+                <span className="rounded-md bg-[#FFF7E6] px-2 py-1 text-xs font-bold text-[#7A5C00]">{item.targetType}</span>
+              </div>
+              <h4 className="mt-3 text-lg font-extrabold leading-6 text-slate-800">
+                {item.student.name}
+                <span className="ml-2 text-sm font-bold text-slate-500">{item.student.studentId}</span>
+              </h4>
+            </div>
+            <div className="shrink-0 rounded-md bg-[#F7F9FC] px-3 py-2 text-right">
+              <div className="text-xs font-bold text-slate-500">本次</div>
+              <div className="mt-1 text-xl font-extrabold text-slate-800">{formatScore(item.student.currentScore)}</div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+            <div className="rounded-md bg-[#F7F9FC] px-3 py-2">
+              <div className="text-xs font-bold text-slate-500">基准分</div>
+              <div className="mt-1 font-extrabold text-slate-800">{formatScore(item.student.baselineScore)}</div>
+            </div>
+            <div className="rounded-md bg-[#F7F9FC] px-3 py-2">
+              <div className="text-xs font-bold text-slate-500">排名变化</div>
+              <div className="mt-1 font-extrabold text-[#2F4F68]">{formatRankChange(item.student.rankChange)}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1">
+            {item.evidenceTags.map((tag) => (
+              <span key={tag} className="rounded-md bg-[#EEF4F8] px-2 py-1 text-xs font-bold text-[#2F4F68]">
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
+            <div>
+              <div className="text-xs font-bold text-slate-500">关注理由</div>
+              <p>{item.reason}</p>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-500">建议动作</div>
+              <p>{item.action}</p>
+            </div>
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
@@ -160,14 +175,23 @@ export default async function FocusPage({ params }: FocusPageProps) {
                     <div className="border-b border-[#D0D7DE] bg-white px-5 py-3">
                       <h3 className="font-extrabold text-slate-800">主名单：重点盯 3 人 + 顺手关注 2 人</h3>
                     </div>
-                    <FocusTable students={focusReport.students} />
+                    <FocusStudentList students={focusReport.students} />
                     {focusReport.backupStudents.length > 0 ? (
-                      <div className="border-t border-[#D0D7DE]">
-                        <div className="border-b border-[#D0D7DE] bg-[#F7F9FC] px-5 py-3">
-                          <h3 className="font-extrabold text-slate-800">候补关注：有余力时补充</h3>
-                        </div>
-                        <FocusTable students={focusReport.backupStudents} startIndex={focusReport.students.length + 1} />
-                      </div>
+                      <details className="group border-t border-[#D0D7DE]">
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-[#D0D7DE] bg-[#F7F9FC] px-5 py-3">
+                          <div>
+                            <h3 className="font-extrabold text-slate-800">候补关注：有余力时补充</h3>
+                            <p className="mt-1 text-sm text-slate-500">共 {focusReport.backupStudents.length} 人，默认收起，点击查看。</p>
+                          </div>
+                          <span className="shrink-0 rounded-md border border-[#9fb3c4] bg-white px-3 py-2 text-sm font-bold text-[#2F4F68] group-open:hidden">
+                            展开
+                          </span>
+                          <span className="hidden shrink-0 rounded-md border border-[#9fb3c4] bg-white px-3 py-2 text-sm font-bold text-[#2F4F68] group-open:inline">
+                            收起
+                          </span>
+                        </summary>
+                        <FocusStudentList students={focusReport.backupStudents} startIndex={focusReport.students.length + 1} />
+                      </details>
                     ) : null}
                   </div>
                 )}
