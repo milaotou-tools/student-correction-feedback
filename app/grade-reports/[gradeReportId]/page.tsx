@@ -19,38 +19,86 @@ function formatRankChange(value: number | null): string {
   return "持平";
 }
 
+function groupStudentsByClass(students: GradeStudentRecord[]): GradeStudentRecord[][] {
+  const groups: GradeStudentRecord[][] = [];
+  const indexByClass = new Map<string, number>();
+
+  for (const student of students) {
+    const existingIndex = indexByClass.get(student.className);
+    if (existingIndex === undefined) {
+      indexByClass.set(student.className, groups.length);
+      groups.push([student]);
+      continue;
+    }
+    groups[existingIndex].push(student);
+  }
+
+  return groups;
+}
+
 function StudentMiniTable({ students, emptyText }: { students: GradeStudentRecord[]; emptyText: string }) {
   if (students.length === 0) {
     return <div className="rounded-md border border-[#D0D7DE] bg-[#F7F9FC] px-4 py-6 text-center text-sm text-slate-500">{emptyText}</div>;
   }
 
+  const groupedStudents = groupStudentsByClass(students);
+
   return (
-    <div className="max-w-full overflow-hidden rounded-md border border-[#D0D7DE]">
-      <table className="w-full table-fixed border-collapse text-[12px] sm:text-sm">
-        <thead>
-          <tr className="bg-[#D9EAF7] text-slate-800">
-            <th className="w-[15%] border border-[#D0D7DE] px-2 py-3 text-left">班级</th>
-            <th className="w-[24%] border border-[#D0D7DE] px-2 py-3 text-left">姓名</th>
-            <th className="w-[28%] border border-[#D0D7DE] px-2 py-3 text-left">变化</th>
-            <th className="w-[33%] border border-[#D0D7DE] px-2 py-3 text-left">成绩/排名</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student) => (
-            <tr key={`${student.className}-${student.studentId}-${student.name}`} className="odd:bg-white even:bg-[#F7F9FC]">
-              <td className="border border-[#D0D7DE] px-2 py-3 font-bold">{student.className}</td>
-              <td className="break-keep border border-[#D0D7DE] px-2 py-3 font-bold">{student.name}</td>
-              <td className="border border-[#D0D7DE] px-2 py-3 font-bold leading-5 text-[#2F4F68]">{formatRankChange(student.rankChange)}</td>
-              <td className="border border-[#D0D7DE] px-2 py-3 leading-5 text-slate-600">
-                <div className="font-bold text-slate-800">{formatNumber(student.currentScore)}分</div>
-                <div className="mt-0.5 whitespace-nowrap text-[11px] text-slate-500 sm:text-xs">
-                  排名 {formatNumber(student.baselineRank)}→{formatNumber(student.currentRank)}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-4">
+      {groupedStudents.map((group) => (
+        <section key={group[0].className} className="max-w-full overflow-hidden rounded-xl border border-[#D0D7DE] bg-white shadow-sm">
+          <div className="flex items-center justify-between gap-3 border-b border-[#D0D7DE] bg-[#F3F7FB] px-3 py-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-[#2F4F68] px-2.5 py-1 text-[11px] font-extrabold leading-none text-white">
+                {group[0].className}
+              </span>
+              <span className="text-[11px] text-slate-500">{group.length} 人</span>
+            </div>
+          </div>
+          <table className="w-full table-fixed border-collapse text-[12px] sm:text-sm">
+            <thead>
+              <tr className="bg-[#F8FAFD] text-slate-800">
+                <th className="w-[28%] border border-[#D0D7DE] px-3 py-2.5 text-left">姓名</th>
+                <th className="w-[22%] border border-[#D0D7DE] px-3 py-2.5 text-left">成绩</th>
+                <th className="w-[50%] border border-[#D0D7DE] px-3 py-2.5 text-left">排行</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.map((student) => (
+                <tr key={`${student.className}-${student.studentId}-${student.name}`} className="odd:bg-white even:bg-[#F7F9FC]">
+                  <td className="break-keep border border-[#D0D7DE] px-3 py-3 text-[15px] font-extrabold text-slate-800 sm:text-base">
+                    {student.name}
+                  </td>
+                  <td className="border border-[#D0D7DE] px-3 py-3 leading-5 text-slate-600">
+                    <div className="text-[16px] font-extrabold leading-6 text-slate-800 sm:text-lg">{formatNumber(student.currentScore)}分</div>
+                  </td>
+                  <td className="relative border border-[#D0D7DE] px-3 py-3 pb-6 leading-5 text-slate-600">
+                    <div
+                      className={`absolute right-2 bottom-2 text-[12px] font-extrabold leading-none ${
+                        student.rankChange === null
+                          ? "text-slate-400"
+                          : student.rankChange > 0
+                            ? "text-emerald-600"
+                            : "text-rose-600"
+                      }`}
+                    >
+                      {student.rankChange === null ? "-" : student.rankChange > 0 ? `+${student.rankChange}` : `${student.rankChange}`}
+                    </div>
+                    <div className="pr-8">
+                      <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
+                        <span className="whitespace-nowrap text-[11px] text-slate-500 sm:text-xs">排名</span>
+                        <span className="text-[14px] font-extrabold text-slate-800 sm:text-[15px]">
+                          {formatNumber(student.baselineRank)}→{formatNumber(student.currentRank)}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      ))}
     </div>
   );
 }

@@ -20,6 +20,21 @@ function formatScore(value: number | null): string {
   return value === null ? "-" : `${value}分`;
 }
 
+function getRewardReasonClassName(reason: string): string {
+  if (reason === "优秀") return "bg-[#FFF2CC] text-[#7A5C00]";
+  if (reason === "进步") return "bg-[#E7F5EA] text-[#2F6B3D]";
+  return "bg-[#EEF4F8] text-[#2F4F68]";
+}
+
+function sortStudentsById(students: GradeStudentRecord[]): GradeStudentRecord[] {
+  return [...students].sort((a, b) => {
+    const aId = Number(a.studentId);
+    const bId = Number(b.studentId);
+    if (!Number.isNaN(aId) && !Number.isNaN(bId) && aId !== bId) return aId - bId;
+    return a.studentId.localeCompare(b.studentId, "zh-CN", { numeric: true }) || a.name.localeCompare(b.name, "zh-CN");
+  });
+}
+
 function RewardStudentsList({ students }: { students: GradeStudentRecord[] }) {
   if (students.length === 0) {
     return <div className="px-4 py-8 text-center text-sm text-slate-500">本组暂无学生。</div>;
@@ -29,27 +44,68 @@ function RewardStudentsList({ students }: { students: GradeStudentRecord[] }) {
     <ul className="divide-y divide-[#D0D7DE]">
       {students.map((student) => (
         <li key={`${student.className}-${student.studentId}-${student.name}`} className="px-4 py-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="w-10 shrink-0 text-sm font-extrabold text-[#2F4F68]">{student.className}</span>
-            <span className="w-12 shrink-0 text-sm text-slate-500">{student.studentId}</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="shrink-0 text-sm font-extrabold text-[#2F4F68]">{student.className}</span>
+            <span className="shrink-0 text-sm text-slate-500">{student.studentId}</span>
             <span className="min-w-[4.5rem] text-base font-extrabold text-slate-800">{student.name}</span>
             <span className="text-sm font-bold text-slate-700">{formatScore(student.currentScore)}</span>
-            <span className="text-sm text-slate-500">{formatRankChange(student.rankChange)}</span>
-            {hasDeclinedWhileRewarded(student) ? (
-              <span className="rounded-md bg-[#FFF2CC] px-2 py-1 text-xs font-bold text-[#7A5C00]">状态下滑</span>
-            ) : null}
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-1 pl-0 sm:pl-[7.25rem]">
-            <span className="mr-1 text-xs font-bold text-slate-500">理由</span>
+            <span className="text-xs text-slate-500">{formatRankChange(student.rankChange)}</span>
+            <span className="text-xs font-bold text-slate-500">理由</span>
             {student.rewardReasons.map((reason) => (
-              <span key={reason} className="rounded-md bg-[#EEF4F8] px-2 py-1 text-xs font-bold text-[#2F4F68]">
+              <span key={reason} className={`rounded-md px-2 py-1 text-xs font-bold ${getRewardReasonClassName(reason)}`}>
                 {reason}
               </span>
             ))}
+            {hasDeclinedWhileRewarded(student) ? (
+              <span className="rounded-md bg-[#FFF2CC] px-2 py-1 text-[11px] font-bold text-[#7A5C00]">状态下滑</span>
+            ) : null}
           </div>
         </li>
       ))}
     </ul>
+  );
+}
+
+function ClassRewardCompactList({ students }: { students: GradeStudentRecord[] }) {
+  const sortedStudents = sortStudentsById(students);
+
+  if (sortedStudents.length === 0) {
+    return <div className="px-4 py-8 text-center text-sm text-slate-500">本班暂无学生。</div>;
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-px bg-[#D0D7DE]">
+      {sortedStudents.map((student) => (
+        <div key={`${student.className}-${student.studentId}-${student.name}`} className="relative min-h-[5.75rem] bg-white px-2 py-2">
+          <div
+            className={`absolute right-2 bottom-2 text-[9px] font-extrabold leading-none ${
+              student.rankChange === null
+                ? "text-slate-400"
+                : student.rankChange > 0
+                  ? "text-emerald-600"
+                  : "text-rose-600"
+            }`}
+          >
+            {student.rankChange === null ? "-" : student.rankChange > 0 ? `+${student.rankChange}` : `${student.rankChange}`}
+          </div>
+          <div className="grid h-full min-w-0 grid-rows-[auto_1fr_auto] pb-4 text-left">
+            <div className="flex min-w-0 items-start gap-1 overflow-hidden whitespace-nowrap pr-8">
+              <span className="shrink-0 text-[12px] font-extrabold leading-5 text-[#2F4F68]">{student.studentId}</span>
+            </div>
+            <div className="flex min-w-0 items-center justify-center overflow-hidden whitespace-nowrap px-1">
+              <span className="block w-full min-w-0 -translate-y-1 text-center text-[15px] font-extrabold leading-5 text-slate-800">{student.name}</span>
+            </div>
+            <div className="absolute left-2 bottom-2 flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap pr-8">
+              {student.rewardReasons.slice(0, 2).map((reason) => (
+                <span key={reason} className={`shrink-0 rounded-md px-1 py-0.5 text-[8px] font-bold leading-3 ${getRewardReasonClassName(reason)}`}>
+                  {reason}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -58,14 +114,15 @@ function ExcellentDeclinedList({ students }: { students: GradeStudentRecord[] })
     <ul className="divide-y divide-[#E3C15B]">
       {students.map((student) => (
         <li key={`${student.className}-${student.studentId}-${student.name}`} className="px-4 py-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="w-10 shrink-0 text-sm font-extrabold text-[#7A5C00]">{student.className}</span>
-            <span className="w-12 shrink-0 text-sm text-[#7A5C00]">{student.studentId}</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="shrink-0 text-sm font-extrabold text-[#7A5C00]">{student.className}</span>
+            <span className="shrink-0 text-sm text-[#7A5C00]">{student.studentId}</span>
             <span className="min-w-[4.5rem] text-base font-extrabold text-slate-800">{student.name}</span>
             <span className="text-sm font-bold text-slate-700">{formatScore(student.currentScore)}</span>
-            <span className="text-sm font-bold text-[#7A5C00]">{formatRankChange(student.rankChange)}</span>
+            <span className="text-xs font-bold text-[#7A5C00]">{formatRankChange(student.rankChange)}</span>
+            <span className="text-xs font-bold text-[#7A5C00]">提醒</span>
           </div>
-          <p className="mt-2 text-sm leading-6 text-[#7A5C00] sm:pl-[7.25rem]">成绩仍优秀，但状态明显下滑，建议提醒稳定。</p>
+          <p className="mt-1 text-sm leading-6 text-[#7A5C00]">成绩仍优秀，但状态明显下滑，建议提醒稳定。</p>
         </li>
       ))}
     </ul>
@@ -125,8 +182,9 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
               </summary>
               <div className="space-y-4 border-t border-[#D0D7DE] bg-[#F7F9FC] p-4">
                 {reportData.classes.map((classReport) => {
+                  const sortedClassRewards = sortStudentsById(classReport.rewardStudents);
                   const classCopyText = classReport.rewardStudents.length > 0
-                    ? [`${classReport.className}小零食奖励名单（${classReport.rewardStudents.length}人）`, ...classReport.rewardStudents.map(formatRewardStudentLine)].join("\n")
+                    ? [`${classReport.className}小零食奖励名单（${sortedClassRewards.length}人）`, ...sortedClassRewards.map((student) => `${student.studentId} ${student.name}`)].join("\n")
                     : `${classReport.className}暂无符合小零食奖励规则的学生。`;
 
                   return (
@@ -138,7 +196,7 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
                         </div>
                         <CopyButton text={classCopyText} label="复制本班" />
                       </div>
-                      <RewardStudentsList students={classReport.rewardStudents} />
+                      <ClassRewardCompactList students={classReport.rewardStudents} />
                     </section>
                   );
                 })}
@@ -170,7 +228,7 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
                         </div>
                         <CopyButton text={groupCopyText} label="复制本组" />
                       </div>
-                      <RewardStudentsList students={group.students} />
+                      <ClassRewardCompactList students={group.students} />
                     </section>
                   );
                 })}
