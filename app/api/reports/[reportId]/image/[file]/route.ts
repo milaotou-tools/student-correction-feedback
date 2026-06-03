@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { renderFeedbackSvg } from "@/lib/report-image";
 import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage } from "@/lib/storage";
 
@@ -30,7 +31,12 @@ export async function GET(_request: Request, context: RouteContext) {
     }
   }
 
-  const image = await readReportImage(reportId, safeFile);
+  let image = await readReportImage(reportId, safeFile);
+  if (!image && safeFile.toLowerCase().endsWith(".png")) {
+    const legacySvg = await readReportImage(reportId, safeFile.replace(/\.png$/i, ".svg"));
+    image = legacySvg ? await sharp(legacySvg).png().toBuffer() : null;
+  }
+
   if (image) {
     return new NextResponse(new Uint8Array(image), {
       headers: {
