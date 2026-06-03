@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { getClassImageFileName, saveReportImage } from "./storage";
 import { getAttentionStyle, getStatusStyle } from "./status";
 import type { ClassReport, ReportData, Status } from "./types";
@@ -122,7 +123,9 @@ export function renderFeedbackSvg(reportData: ReportData, classReport: ClassRepo
 
 export async function generateFeedbackPng(reportData: ReportData, classReport: ClassReport, index: number): Promise<void> {
   const fileName = getClassImageFileName(classReport.className, index);
-  await saveReportImage(reportData.reportId, fileName, Buffer.from(renderFeedbackSvg(reportData, classReport), "utf8"));
+  const svg = Buffer.from(renderFeedbackSvg(reportData, classReport), "utf8");
+  const png = await sharp(svg).png().toBuffer();
+  await saveReportImage(reportData.reportId, fileName, png);
 }
 
 export async function generateAllFeedbackPngs(reportData: ReportData): Promise<void> {

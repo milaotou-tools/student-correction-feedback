@@ -60,7 +60,7 @@ export function getLegacyPublicReportDir(reportId: string): string {
 
 export function getClassImageFileName(className: string, index: number): string {
   const numberMatch = className.match(/\d+/);
-  return numberMatch ? `class-${numberMatch[0]}.svg` : `class-${index + 1}.svg`;
+  return numberMatch ? `class-${numberMatch[0]}.png` : `class-${index + 1}.png`;
 }
 
 export function getClassImagePath(reportId: string, className: string, index: number): string {
