@@ -152,7 +152,7 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <CopyButton text={copyText} label="复制全部名单" />
-            <Link href={`/grade-reports/${gradeReportId}`} className="focus-ring rounded-md border border-[#D1D5DB] bg-white px-4 py-3 text-sm font-bold text-[#141413] hover:bg-[#FAF9F6]">
+            <Link href={`/grade-reports/${gradeReportId}`} className="focus-ring rounded-md border border-[#D1D5DB] bg-white px-4 py-3 text-sm font-bold text-[#141413] hover:bg-[#F5F4F0]">
               返回成绩分析
             </Link>
           </div>
@@ -180,7 +180,7 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
                   收起
                 </span>
               </summary>
-              <div className="space-y-4 border-t border-[#E8E6E1] bg-[#FAF9F6] p-4">
+              <div className="space-y-4 border-t border-[#E8E6E1] bg-[#F5F4F0] p-4">
                 {reportData.classes.map((classReport) => {
                   const sortedClassRewards = sortStudentsById(classReport.rewardStudents);
                   const classCopyText = classReport.rewardStudents.length > 0
@@ -189,7 +189,7 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
 
                   return (
                     <section key={classReport.className} className="min-w-0 overflow-hidden rounded-md border border-[#E8E6E1] bg-white">
-                      <div className="flex flex-col gap-3 border-b border-[#E8E6E1] bg-[#FAF9F6] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-col gap-3 border-b border-[#E8E6E1] bg-[#F5F4F0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <h2 className="text-xl font-extrabold text-[#141413]">{classReport.className}</h2>
                           <p className="mt-1 text-sm text-[#6B7280]">{classReport.rewardStudents.length} 人符合奖励规则</p>
@@ -216,12 +216,12 @@ export default async function GradeRewardsPage({ params }: RewardsPageProps) {
                   收起
                 </span>
               </summary>
-              <div className="space-y-4 border-t border-[#E8E6E1] bg-[#FAF9F6] p-4">
+              <div className="space-y-4 border-t border-[#E8E6E1] bg-[#F5F4F0] p-4">
                 {rewardGroups.map((group) => {
                   const groupCopyText = `${group.title}（${group.students.length}人）\n${group.students.map(formatRewardStudentLine).join("\n")}`;
                   return (
                     <section key={group.id} className="min-w-0 overflow-hidden rounded-md border border-[#E8E6E1] bg-white">
-                      <div className="flex flex-col gap-3 border-b border-[#E8E6E1] bg-[#FAF9F6] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-col gap-3 border-b border-[#E8E6E1] bg-[#F5F4F0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <h2 className="text-xl font-extrabold text-[#141413]">{group.title}</h2>
                           <p className="mt-1 text-sm text-[#6B7280]">{group.description}｜{group.students.length} 人</p>

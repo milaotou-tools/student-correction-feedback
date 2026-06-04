@@ -6,14 +6,19 @@ const config: Config = {
     extend: {
       colors: {
         page: "#FAF9F6",
-        card: "#FFFFFF",
+        surface1: "#FFFFFF",
+        surface2: "#F5F4F0",
+        surface3: "#EFEDE9",
         ink: "#141413",
         "ink-hover": "#2A2A28",
         accent: "#0070F3",
         "accent-hover": "#0060DF",
         borderSubtle: "#E8E6E1",
         textPrimary: "#111827",
-        textSecondary: "#6B7280"
+        textSecondary: "#6B7280",
+        stripBlue: "#0070F3",
+        stripAmber: "#D97706",
+        stripGreen: "#16A34A"
       },
       fontFamily: {
         sans: ["Inter", '"Noto Sans SC"', "sans-serif"],

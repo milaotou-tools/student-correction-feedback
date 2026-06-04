@@ -42,7 +42,7 @@ function formatClassCopyTextWithBackup(report: FocusClassReport): string {
 function getLevelClassName(level: string): string {
   if (level === "重点盯") return "bg-[#141413] text-white";
   if (level === "顺手关注") return "bg-[#E8E6E1] text-[#141413]";
-  return "bg-[#FAF9F6] text-[#6B7280]";
+  return "bg-[#F5F4F0] text-[#6B7280]";
 }
 
 function FocusStudentList({ students, startIndex = 1 }: { students: FocusClassReport["students"]; startIndex?: number }) {
@@ -62,18 +62,18 @@ function FocusStudentList({ students, startIndex = 1 }: { students: FocusClassRe
                 <span className="ml-2 text-sm font-bold text-[#6B7280]">{item.student.studentId}</span>
               </h4>
             </div>
-            <div className="shrink-0 rounded-md bg-[#FAF9F6] px-3 py-2 text-right">
+            <div className="shrink-0 rounded-md bg-[#F5F4F0] px-3 py-2 text-right">
               <div className="text-xs font-bold text-[#6B7280]">本次</div>
               <div className="mt-1 text-xl font-extrabold text-[#141413]">{formatScore(item.student.currentScore)}</div>
             </div>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-md bg-[#FAF9F6] px-3 py-2">
+            <div className="rounded-md bg-[#F5F4F0] px-3 py-2">
               <div className="text-xs font-bold text-[#6B7280]">基准分</div>
               <div className="mt-1 font-extrabold text-[#141413]">{formatScore(item.student.baselineScore)}</div>
             </div>
-            <div className="rounded-md bg-[#FAF9F6] px-3 py-2">
+            <div className="rounded-md bg-[#F5F4F0] px-3 py-2">
               <div className="text-xs font-bold text-[#6B7280]">排名变化</div>
               <div className="mt-1 font-extrabold text-[#141413]">{formatRankChange(item.student.rankChange)}</div>
             </div>
@@ -125,7 +125,7 @@ export default async function FocusPage({ params }: FocusPageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <CopyButton text={copyText} label="复制全部名单" />
-            <Link href={`/grade-reports/${gradeReportId}`} className="focus-ring rounded-md border border-[#D1D5DB] bg-white px-4 py-3 text-sm font-bold text-[#141413] hover:bg-[#FAF9F6]">
+            <Link href={`/grade-reports/${gradeReportId}`} className="focus-ring rounded-md border border-[#D1D5DB] bg-white px-4 py-3 text-sm font-bold text-[#141413] hover:bg-[#F5F4F0]">
               返回成绩分析
             </Link>
           </div>
@@ -144,7 +144,7 @@ export default async function FocusPage({ params }: FocusPageProps) {
             const classCopyTextWithBackup = formatClassCopyTextWithBackup(focusReport);
             return (
               <section key={focusReport.className} className="min-w-0 overflow-hidden rounded-md border border-[#E8E6E1] bg-white">
-                <div className="flex flex-col gap-4 border-b border-[#E8E6E1] bg-[#FAF9F6] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-4 border-b border-[#E8E6E1] bg-[#F5F4F0] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <h2 className="text-xl font-extrabold text-[#141413]">{focusReport.className}</h2>
                     <p className="mt-1 text-sm text-[#6B7280]">
@@ -178,7 +178,7 @@ export default async function FocusPage({ params }: FocusPageProps) {
                     <FocusStudentList students={focusReport.students} />
                     {focusReport.backupStudents.length > 0 ? (
                       <details className="group border-t border-[#E8E6E1]">
-                        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-[#E8E6E1] bg-[#FAF9F6] px-5 py-3">
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-[#E8E6E1] bg-[#F5F4F0] px-5 py-3">
                           <div>
                             <h3 className="font-extrabold text-[#141413]">候补关注：有余力时补充</h3>
                             <p className="mt-1 text-sm text-[#6B7280]">共 {focusReport.backupStudents.length} 人，默认收起，点击查看。</p>

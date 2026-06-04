@@ -57,7 +57,7 @@ function StudentMiniTable({ students, emptyText }: { students: GradeStudentRecor
           </div>
           <table className="w-full table-fixed border-collapse text-[12px] sm:text-sm">
             <thead>
-              <tr className="bg-[#FAF9F6] text-[#141413]">
+              <tr className="bg-[#EFEDE9] text-[#141413]">
                 <th className="w-[28%] border border-[#E8E6E1] px-3 py-2.5 text-left font-semibold">姓名</th>
                 <th className="w-[22%] border border-[#E8E6E1] px-3 py-2.5 text-left font-semibold">成绩</th>
                 <th className="w-[50%] border border-[#E8E6E1] px-3 py-2.5 text-left font-semibold">排行</th>
@@ -118,7 +118,7 @@ function ClassDistributionOverview({ classes }: { classes: GradeClassReport[] })
       </div>
       <div className="p-4 grid min-w-0 gap-4 lg:grid-cols-2">
         {classes.map((classReport) => (
-          <article key={classReport.className} className="min-w-0 rounded-md border border-[#E8E6E1] bg-[#FAF9F6] p-4">
+          <article key={classReport.className} className="min-w-0 rounded-md border border-[#E8E6E1] bg-[#F5F4F0] p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="text-2xl font-bold tracking-[-0.01em] text-[#141413]">{classReport.className}</h3>
@@ -229,15 +229,15 @@ export default async function GradeReportPage({ params }: GradeReportPageProps) 
 
         <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-2">
           <section className="min-w-0 rounded-md border border-[#E8E6E1] bg-white">
-            <div className="border-b border-[#E8E6E1] px-5 py-4">
+            <div className="border-b border-[#E8E6E1] bg-[#F5F4F0] px-5 py-4">
               <h2 className="text-xl font-bold tracking-[-0.01em] text-[#141413]">明显进步学生</h2>
             </div>
             <div className="p-4">
               <StudentMiniTable students={improvedStudents} emptyText="暂无进步 5 名及以上的学生。" />
             </div>
           </section>
-          <section className="min-w-0 rounded-md border border-[#E8E6E1] bg-white">
-            <div className="border-b border-[#E8E6E1] px-5 py-4">
+          <section className="min-w-0 rounded-md border border-[#E8E6E1] bg-[#F5F4F0]">
+            <div className="border-b border-[#E8E6E1] bg-white px-5 py-4">
               <h2 className="text-xl font-bold tracking-[-0.01em] text-[#141413]">明显退步学生</h2>
             </div>
             <div className="p-4">

@@ -17,8 +17,8 @@ export default function HomePage() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
-            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+          <section className="rounded-md border border-[#E8E6E1] border-l-[3px] border-l-[#0070F3] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#0070F3] uppercase">
               订正反馈
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
@@ -35,8 +35,8 @@ export default function HomePage() {
             </Link>
           </section>
 
-          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
-            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+          <section className="rounded-md border border-[#E8E6E1] border-l-[3px] border-l-[#D97706] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#D97706] uppercase">
               考试分析
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
@@ -53,8 +53,8 @@ export default function HomePage() {
             </Link>
           </section>
 
-          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
-            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+          <section className="rounded-md border border-[#E8E6E1] border-l-[3px] border-l-[#16A34A] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#16A34A] uppercase">
               课题研究
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
