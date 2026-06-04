@@ -54,20 +54,20 @@ function getDateWidth(reportData: ReportData): number {
   return (TABLE_WIDTH - ID_WIDTH - NAME_WIDTH - ATTENTION_WIDTH) / reportData.dates.length;
 }
 
-function statusCell(status: Status, width: number): string {
+function statusCell(status: Status): string {
   const style = getStatusStyle(status);
-  return `<div class="cell" style="width:${width}px;height:${ROW_HEIGHT}px;background:${style.background};color:${style.color};font-weight:${style.fontWeight ?? 600};">${escapeHtml(status)}</div>`;
+  return `<div class="cell" style="height:${ROW_HEIGHT}px;background:${style.background};color:${style.color};font-weight:${style.fontWeight ?? 600};">${escapeHtml(status)}</div>`;
 }
 
 function attentionCell(level: ClassReport["students"][number]["attentionLevel"]): string {
   const style = getAttentionStyle(level);
-  return `<div class="cell attention-cell" style="width:${ATTENTION_WIDTH}px;height:${ROW_HEIGHT}px;background:#F3F6FA;">
+  return `<div class="cell attention-cell" style="height:${ROW_HEIGHT}px;background:#F3F6FA;">
     <span class="attention-badge" style="background:${style.background};color:${style.color};border-color:${style.border ?? "#C8C8C8"};font-weight:${style.fontWeight ?? 700};">${escapeHtml(level)}</span>
   </div>`;
 }
 
-function headerCell(label: string, width: number): string {
-  return `<div class="cell header-cell" style="width:${width}px;height:${HEADER_HEIGHT}px;">${escapeHtml(label)}</div>`;
+function headerCell(label: string): string {
+  return `<div class="cell header-cell" style="height:${HEADER_HEIGHT}px;">${escapeHtml(label)}</div>`;
 }
 
 function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fontCss: string): { html: string; height: number } {
@@ -76,22 +76,23 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
   const footerY = TOP_SPACE + tableHeight + FOOTER_GAP;
   const height = footerY + FOOTER_HEIGHT + BOTTOM_SPACE;
   const columnWidths = [ID_WIDTH, NAME_WIDTH, ATTENTION_WIDTH, ...reportData.dates.map(() => dateWidth)];
+  const gridColumns = columnWidths.map((width) => `${width}px`).join(" ");
   const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
 
   const header = [
-    headerCell("学号", ID_WIDTH),
-    headerCell("姓名", NAME_WIDTH),
-    headerCell("关注等级", ATTENTION_WIDTH),
-    ...reportData.dates.map((date) => headerCell(date, dateWidth))
+    headerCell("学号"),
+    headerCell("姓名"),
+    headerCell("关注等级"),
+    ...reportData.dates.map((date) => headerCell(date))
   ].join("");
 
   const rows = classReport.students
     .map((student) =>
       [
-        `<div class="cell base-cell" style="width:${ID_WIDTH}px;height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.studentId)}</div>`,
-        `<div class="cell base-cell" style="width:${NAME_WIDTH}px;height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.name)}</div>`,
+        `<div class="cell base-cell" style="height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.studentId)}</div>`,
+        `<div class="cell base-cell" style="height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.name)}</div>`,
         attentionCell(student.attentionLevel),
-        ...reportData.dates.map((date) => statusCell(student.statuses[date] ?? "", dateWidth))
+        ...reportData.dates.map((date) => statusCell(student.statuses[date] ?? ""))
       ].join("")
     )
     .join("");
@@ -135,8 +136,8 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
       color: #52616f;
     }
     .table {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: ${gridColumns};
       width: ${tableWidth}px;
       margin-top: 36px;
       border-top: 1px solid #D0D7DE;
@@ -148,6 +149,7 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
       justify-content: center;
       border-right: 1px solid #D0D7DE;
       border-bottom: 1px solid #D0D7DE;
+      min-width: 0;
       text-align: center;
       font-size: 17px;
       line-height: 22px;
