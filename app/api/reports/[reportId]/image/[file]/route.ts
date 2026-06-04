@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import sharp from "sharp";
-import { renderFeedbackSvg } from "@/lib/report-image";
+import { renderFeedbackPngBuffer } from "@/lib/report-image";
 import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage, saveReportImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -9,33 +8,22 @@ type RouteContext = {
   params: Promise<{ reportId: string; file: string }>;
 };
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { reportId, file } = await context.params;
   const safeFile = file.split("/").pop();
+  const version = new URL(request.url).searchParams.get("v");
+  const shouldRegenerate = version === "browser-png-v3";
 
   if (!safeFile) {
     return NextResponse.json({ error: "Invalid file name" }, { status: 400 });
   }
 
-  if (safeFile.toLowerCase().endsWith(".svg")) {
+  let image = shouldRegenerate ? null : await readReportImage(reportId, safeFile);
+  if (!image && safeFile.toLowerCase().endsWith(".png")) {
     const reportData = await readReportData(reportId).catch(() => null);
     const classReport = reportData?.classes.find((item, index) => getClassImageFileName(item.className, index) === safeFile);
-
     if (reportData && classReport) {
-      return new NextResponse(renderFeedbackSvg(reportData, classReport), {
-        headers: {
-          "Content-Type": "image/svg+xml; charset=utf-8",
-          "Cache-Control": "no-store"
-        }
-      });
-    }
-  }
-
-  let image = await readReportImage(reportId, safeFile);
-  if (!image && safeFile.toLowerCase().endsWith(".png")) {
-    const legacySvg = await readReportImage(reportId, safeFile.replace(/\.png$/i, ".svg"));
-    if (legacySvg) {
-      image = await sharp(legacySvg).png().toBuffer();
+      image = await renderFeedbackPngBuffer(reportData, classReport);
       await saveReportImage(reportId, safeFile, image).catch(() => undefined);
     }
   }

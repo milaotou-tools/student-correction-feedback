@@ -68,7 +68,7 @@ export function getClassImagePath(reportId: string, className: string, index: nu
 }
 
 export function getClassImageUrl(reportId: string, className: string, index: number): string {
-  return withAppBasePath(`/api/reports/${reportId}/image/${getClassImageFileName(className, index)}?v=png-cache-v2`);
+  return withAppBasePath(`/api/reports/${reportId}/image/${getClassImageFileName(className, index)}?v=browser-png-v3`);
 }
 
 export function getClassDownloadUrl(reportId: string, className: string, index: number): string {

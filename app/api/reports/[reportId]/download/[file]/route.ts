@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import sharp from "sharp";
-import { renderFeedbackSvg } from "@/lib/report-image";
+import { renderFeedbackPngBuffer } from "@/lib/report-image";
 import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage, saveReportImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -17,26 +16,12 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid file name" }, { status: 400 });
   }
 
-  if (safeFile.toLowerCase().endsWith(".svg")) {
-    const reportData = await readReportData(reportId).catch(() => null);
-    const classReport = reportData?.classes.find((item, index) => getClassImageFileName(item.className, index) === safeFile);
-
-    if (reportData && classReport) {
-      return new NextResponse(renderFeedbackSvg(reportData, classReport), {
-        headers: {
-          "Content-Type": "image/svg+xml; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${safeFile}"`,
-          "Cache-Control": "no-store"
-        }
-      });
-    }
-  }
-
   let image = await readReportImage(reportId, safeFile);
   if (!image && safeFile.toLowerCase().endsWith(".png")) {
-    const legacySvg = await readReportImage(reportId, safeFile.replace(/\.png$/i, ".svg"));
-    if (legacySvg) {
-      image = await sharp(legacySvg).png().toBuffer();
+    const reportData = await readReportData(reportId).catch(() => null);
+    const classReport = reportData?.classes.find((item, index) => getClassImageFileName(item.className, index) === safeFile);
+    if (reportData && classReport) {
+      image = await renderFeedbackPngBuffer(reportData, classReport);
       await saveReportImage(reportId, safeFile, image).catch(() => undefined);
     }
   }
