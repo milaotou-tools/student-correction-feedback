@@ -196,6 +196,9 @@ export default async function GradeReportPage({ params }: GradeReportPageProps) 
             <Link href={`/grade-reports/${gradeReportId}/parent-messages`} className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
               家长沟通话术
             </Link>
+            <Link href="/" className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
+              返回首页
+            </Link>
           </div>
         </div>
 
