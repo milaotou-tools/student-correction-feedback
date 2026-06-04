@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGroupMessage } from "@/lib/report-utils";
-import { getClassImageUrl, readReportData } from "@/lib/storage";
+import { getClassImageUrl, markLatestReport, readReportData } from "@/lib/storage";
 
 type ReportPageProps = {
   params: Promise<{ reportId: string }>;
@@ -11,6 +11,7 @@ export default async function ReportPage({ params }: ReportPageProps) {
   const { reportId } = await params;
   const reportData = await readReportData(reportId).catch(() => null);
   if (!reportData) notFound();
+  await markLatestReport(reportData).catch(() => undefined);
 
   const groupMessage = getGroupMessage();
 

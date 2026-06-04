@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseExcel } from "@/lib/excel";
 import { generateAllFeedbackPngs } from "@/lib/report-image";
-import { saveReportData } from "@/lib/storage";
+import { markLatestReport, saveReportData } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     const reportData = await parseExcel(buffer, weekLabel);
     await saveReportData(reportData);
     await generateAllFeedbackPngs(reportData);
+    await markLatestReport(reportData);
 
     return NextResponse.json({ reportId: reportData.reportId, warnings: reportData.warnings });
   } catch (caught) {

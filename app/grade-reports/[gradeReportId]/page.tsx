@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildParentMessageGroups } from "@/lib/grade-parent-messages";
-import { readGradeReportData } from "@/lib/grade-storage";
+import { markLatestGradeReport, readGradeReportData } from "@/lib/grade-storage";
 import type { GradeClassReport, GradeStudentRecord, ScoreBandSummary } from "@/lib/grade-types";
 
 type GradeReportPageProps = {
@@ -165,6 +165,7 @@ export default async function GradeReportPage({ params }: GradeReportPageProps) 
   const { gradeReportId } = await params;
   const reportData = await readGradeReportData(gradeReportId).catch(() => null);
   if (!reportData) notFound();
+  await markLatestGradeReport(reportData).catch(() => undefined);
 
   const improvedStudents = reportData.classes.flatMap((classReport) => classReport.improvedStudents).slice(0, 20);
   const declinedStudents = reportData.classes.flatMap((classReport) => classReport.declinedStudents).slice(0, 20);

@@ -24,6 +24,10 @@ function getReportBlobPath(reportId: string): string {
   return `data/reports/${reportId}/report.json`;
 }
 
+function getLatestReportBlobPath(): string {
+  return "data/reports/latest.json";
+}
+
 function getReportImageBlobPath(reportId: string, fileName: string): string {
   return `generated-reports/${reportId}/${fileName}`;
 }
@@ -98,6 +102,25 @@ export async function saveReportData(reportData: ReportData): Promise<void> {
   await fs.writeFile(path.join(dir, "report.json"), JSON.stringify(reportData, null, 2), "utf8");
 }
 
+export async function markLatestReport(reportData: ReportData): Promise<void> {
+  const latest = {
+    reportId: reportData.reportId,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (shouldUseBlobStorage()) {
+    await putBlob(getLatestReportBlobPath(), JSON.stringify(latest, null, 2), {
+      access: "private",
+      allowOverwrite: true,
+      contentType: "application/json"
+    });
+    return;
+  }
+
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(path.join(DATA_DIR, "latest.json"), JSON.stringify(latest, null, 2), "utf8");
+}
+
 export async function readReportData(reportId: string): Promise<ReportData> {
   const blobData = await readJsonBlob<ReportData>(getReportBlobPath(reportId)).catch(() => null);
   if (blobData) {
@@ -119,6 +142,37 @@ export async function readReportData(reportId: string): Promise<ReportData> {
   }
 
   throw new Error("Report data not found");
+}
+
+export async function readLatestReportData(): Promise<ReportData | null> {
+  const blobLatest = await readJsonBlob<{ reportId: string }>(getLatestReportBlobPath()).catch(() => null);
+  if (blobLatest?.reportId) {
+    return readReportData(blobLatest.reportId).catch(() => null);
+  }
+
+  const latestPath = path.join(DATA_DIR, "latest.json");
+  try {
+    const latest = JSON.parse(await fs.readFile(latestPath, "utf8")) as { reportId?: string };
+    if (latest.reportId) {
+      return await readReportData(latest.reportId).catch(() => null);
+    }
+  } catch {
+    // fall back to scanning local reports
+  }
+
+  try {
+    const entries = await fs.readdir(DATA_DIR, { withFileTypes: true });
+    const reports: ReportData[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const report = await readReportData(entry.name).catch(() => null);
+      if (report) reports.push(report);
+    }
+    reports.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    return reports[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function ensurePublicReportDir(reportId: string): Promise<void> {

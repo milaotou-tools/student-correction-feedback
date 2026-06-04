@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseGradeExcel } from "@/lib/grade-excel";
-import { saveGradeReportData } from "@/lib/grade-storage";
+import { markLatestGradeReport, saveGradeReportData } from "@/lib/grade-storage";
 
 export const runtime = "nodejs";
 
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await fileValue.arrayBuffer());
     const reportData = await parseGradeExcel(buffer);
     await saveGradeReportData(reportData);
+    await markLatestGradeReport(reportData);
 
     return NextResponse.json({ gradeReportId: reportData.gradeReportId, warnings: reportData.warnings });
   } catch (caught) {
