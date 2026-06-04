@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { renderFeedbackSvg } from "@/lib/report-image";
-import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage } from "@/lib/storage";
+import { getClassImageFileName, getReportImageContentType, readReportData, readReportImage, saveReportImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -34,14 +34,19 @@ export async function GET(_request: Request, context: RouteContext) {
   let image = await readReportImage(reportId, safeFile);
   if (!image && safeFile.toLowerCase().endsWith(".png")) {
     const legacySvg = await readReportImage(reportId, safeFile.replace(/\.png$/i, ".svg"));
-    image = legacySvg ? await sharp(legacySvg).png().toBuffer() : null;
+    if (legacySvg) {
+      image = await sharp(legacySvg).png().toBuffer();
+      await saveReportImage(reportId, safeFile, image).catch(() => undefined);
+    }
   }
 
   if (image) {
     return new NextResponse(new Uint8Array(image), {
       headers: {
         "Content-Type": getReportImageContentType(safeFile),
-        "Cache-Control": "no-store"
+        "Content-Length": String(image.byteLength),
+        "Content-Disposition": `inline; filename="${safeFile}"`,
+        "Cache-Control": "public, max-age=31536000, immutable"
       }
     });
   }
