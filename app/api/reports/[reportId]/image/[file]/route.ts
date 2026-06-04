@@ -12,19 +12,23 @@ export async function GET(request: Request, context: RouteContext) {
   const { reportId, file } = await context.params;
   const safeFile = file.split("/").pop();
   const version = new URL(request.url).searchParams.get("v");
-  const shouldRegenerate = version === "browser-png-v5";
 
   if (!safeFile) {
     return NextResponse.json({ error: "Invalid file name" }, { status: 400 });
   }
 
-  let image = shouldRegenerate ? null : await readReportImage(reportId, safeFile);
+  const versionedFile =
+    version === "browser-png-v6" && safeFile.toLowerCase().endsWith(".png")
+      ? safeFile.replace(/\.png$/i, ".browser-v6.png")
+      : safeFile;
+
+  let image = await readReportImage(reportId, versionedFile);
   if (!image && safeFile.toLowerCase().endsWith(".png")) {
     const reportData = await readReportData(reportId).catch(() => null);
     const classReport = reportData?.classes.find((item, index) => getClassImageFileName(item.className, index) === safeFile);
     if (reportData && classReport) {
       image = await renderFeedbackPngBuffer(reportData, classReport);
-      await saveReportImage(reportId, safeFile, image).catch(() => undefined);
+      await saveReportImage(reportId, versionedFile, image).catch(() => undefined);
     }
   }
 
