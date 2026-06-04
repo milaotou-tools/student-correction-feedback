@@ -190,10 +190,10 @@ export default async function GradeReportPage({ params }: GradeReportPageProps) 
             <Link href={`/grade-reports/${gradeReportId}/focus`} className="focus-ring rounded-md bg-[#2F4F68] px-4 py-3 text-sm font-bold text-white hover:bg-[#263f53]">
               加强关注名单
             </Link>
-            <Link href={`/grade-reports/${gradeReportId}/rewards`} className="focus-ring rounded-md bg-[#2F4F68] px-4 py-3 text-sm font-bold text-white hover:bg-[#263f53]">
+            <Link href={`/grade-reports/${gradeReportId}/rewards`} className="focus-ring rounded-md bg-[#7A5C24] px-4 py-3 text-sm font-bold text-white hover:bg-[#604717]">
               小零食奖励名单
             </Link>
-            <Link href={`/grade-reports/${gradeReportId}/parent-messages`} className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
+            <Link href={`/grade-reports/${gradeReportId}/parent-messages`} className="focus-ring rounded-md bg-[#2D6A4F] px-4 py-3 text-sm font-bold text-white hover:bg-[#1F4D38]">
               家长沟通话术
             </Link>
             <Link href="/" className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-3 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
