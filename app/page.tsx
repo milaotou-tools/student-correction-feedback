@@ -7,14 +7,14 @@ export default function HomePage() {
         <div className="border-b border-[#D0D7DE] pb-6">
           <p className="text-sm font-bold text-[#2F4F68]">达达教学工具台</p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-normal text-slate-800">
-            一周订正与成绩分析
+            达达教学工具台
           </h1>
           <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-            两个功能独立使用，数据互不混用。需要处理订正情况时进入“一周订正”，需要分析考试成绩时进入“成绩分析报告”。
+            三个功能独立使用，数据互不混用。需要处理订正情况时进入"一周订正"，需要分析考试成绩时进入"成绩分析报告"，需要整理课题申报思路时进入"课题申报小助手"。
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <section className="rounded-md border border-[#D0D7DE] bg-white p-6 shadow-sm">
             <p className="text-sm font-bold text-[#2F4F68]">订正反馈</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-normal text-slate-800">一周订正</h2>
@@ -40,6 +40,20 @@ export default function HomePage() {
               className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[#7A5C24] px-5 text-sm font-bold text-white transition hover:bg-[#604717]"
             >
               进入成绩分析
+            </Link>
+          </section>
+
+          <section className="rounded-md border border-[#D0D7DE] bg-white p-6 shadow-sm">
+            <p className="text-sm font-bold text-[#2D6A4F]">课题研究</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-normal text-slate-800">课题申报小助手</h2>
+            <p className="mt-3 min-h-24 text-sm leading-6 text-slate-600">
+              从课题想法生成申报书框架，对已有草稿进行整体诊断、逐栏打磨和模拟专家预审。适合校本研修现场演示和教师独立梳理申报思路。
+            </p>
+            <Link
+              href="/proposal-helper"
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[#2D6A4F] px-5 text-sm font-bold text-white transition hover:bg-[#1F4D38]"
+            >
+              进入课题申报小助手
             </Link>
           </section>
         </div>
