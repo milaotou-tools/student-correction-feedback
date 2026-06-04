@@ -16,6 +16,9 @@ export default async function TeacherFollowUpPage({ params }: TeacherPageProps) 
             <p className="text-sm font-bold text-[#2F4F68]">仅教师本人查看</p>
             <h1 className="mt-1 text-3xl font-extrabold text-slate-800">教师内部跟进页</h1>
           </div>
+          <Link href="/" className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-2 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
+            返回达达工作台
+          </Link>
           <Link href={`/reports/${reportId}`} className="focus-ring rounded-md border border-[#9fb3c4] bg-white px-4 py-2 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]">
             返回结果页
           </Link>

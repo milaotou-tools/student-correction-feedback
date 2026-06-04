@@ -10,6 +10,12 @@ export default function UploadPage() {
           <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
             请上传本周学生订正情况 Excel。系统将自动生成 1班、2班家长反馈图，并生成教师内部跟进页。
           </p>
+          <Link
+            href="/"
+            className="mt-4 inline-flex h-11 items-center justify-center rounded-md border border-[#9fb3c4] bg-white px-4 text-sm font-bold text-[#2F4F68] hover:bg-[#F3F6FA]"
+          >
+            返回达达工作台
+          </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
