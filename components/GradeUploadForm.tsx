@@ -41,9 +41,9 @@ export function GradeUploadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-md border border-[#D0D7DE] bg-white p-7 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-md border border-[#E8E6E1] bg-white p-7">
       <div>
-        <label htmlFor="gradeFile" className="mb-2 block text-sm font-bold text-slate-700">
+        <label htmlFor="gradeFile" className="mb-2 block text-sm font-bold text-[#141413]">
           成绩 Excel 文件
         </label>
         <input
@@ -51,7 +51,7 @@ export function GradeUploadForm() {
           type="file"
           accept=".xlsx,.xls"
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-          className="focus-ring w-full rounded-md border border-dashed border-[#9fb3c4] bg-[#F7F9FC] px-4 py-4 text-sm"
+          className="focus-ring w-full rounded-md border border-dashed border-[#D1D5DB] bg-[#FAF9F6] px-4 py-4 text-sm"
         />
       </div>
 
@@ -60,7 +60,7 @@ export function GradeUploadForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="focus-ring inline-flex w-full items-center justify-center rounded-md bg-[#2F4F68] px-5 py-3 font-bold text-white transition hover:bg-[#263f53] disabled:cursor-not-allowed disabled:opacity-60"
+        className="focus-ring inline-flex w-full items-center justify-center rounded-md bg-[#141413] px-5 py-3 font-bold text-white transition hover:bg-[#2A2A28] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? "正在分析成绩..." : "生成成绩分析"}
       </button>

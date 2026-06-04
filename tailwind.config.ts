@@ -5,12 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        page: "#F7F9FC",
-        headerBlue: "#D9EAF7",
-        borderSoft: "#D0D7DE"
+        page: "#FAF9F6",
+        card: "#FFFFFF",
+        ink: "#141413",
+        "ink-hover": "#2A2A28",
+        accent: "#0070F3",
+        "accent-hover": "#0060DF",
+        borderSubtle: "#E8E6E1",
+        textPrimary: "#111827",
+        textSecondary: "#6B7280"
       },
       fontFamily: {
-        sans: ["Arial", '"Microsoft YaHei"', '"PingFang SC"', "sans-serif"]
+        sans: ["Inter", '"Noto Sans SC"', "sans-serif"],
+        mono: ["'JetBrains Mono'", "monospace"]
+      },
+      borderRadius: {
+        card: "6px"
       }
     }
   },

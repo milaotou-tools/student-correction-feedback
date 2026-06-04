@@ -58,10 +58,10 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
 
   if (!students) {
     return (
-      <form onSubmit={handleSubmit} className="mx-auto max-w-md rounded-md border border-[#D0D7DE] bg-white p-7 shadow-sm">
-        <h1 className="text-2xl font-extrabold text-slate-800">教师跟进页</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">此页面仅教师本人查看。请输入访问密码后查看重点关注学生。</p>
-        <label htmlFor="password" className="mt-6 block text-sm font-bold text-slate-700">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-md rounded-md border border-[#E8E6E1] bg-white p-7">
+        <h1 className="text-2xl font-extrabold text-[#141413]">教师跟进页</h1>
+        <p className="mt-3 text-sm leading-6 text-[#6B7280]">此页面仅教师本人查看。请输入访问密码后查看重点关注学生。</p>
+        <label htmlFor="password" className="mt-6 block text-sm font-bold text-[#141413]">
           访问密码
         </label>
         <input
@@ -69,13 +69,13 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="focus-ring mt-2 w-full rounded-md border border-[#D0D7DE] bg-[#F7F9FC] px-4 py-3"
+          className="focus-ring mt-2 w-full rounded-md border border-[#E8E6E1] bg-[#FAF9F6] px-4 py-3"
         />
         {error ? <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
         <button
           type="submit"
           disabled={loading}
-          className="focus-ring mt-6 w-full rounded-md bg-[#2F4F68] px-5 py-3 font-bold text-white hover:bg-[#263f53] disabled:opacity-60"
+          className="focus-ring mt-6 w-full rounded-md bg-[#141413] px-5 py-3 font-bold text-white hover:bg-[#2A2A28] disabled:opacity-60"
         >
           {loading ? "正在校验..." : "查看跟进名单"}
         </button>
@@ -86,26 +86,26 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
   const groups = groupByReminder(students);
 
   return (
-    <section className="rounded-md border border-[#D0D7DE] bg-white shadow-sm">
-      <div className="border-b border-[#D0D7DE] bg-[#D9EAF7] px-5 py-4">
-        <h1 className="text-xl font-extrabold text-slate-800">重点关注学生</h1>
-        <p className="mt-1 text-sm text-slate-600">仅显示本周出现“未交”的学生，并按相同提醒话术分组。</p>
+    <section className="rounded-md border border-[#E8E6E1] bg-white">
+      <div className="border-b border-[#E8E6E1] bg-[#FAF9F6] px-5 py-4">
+        <h1 className="text-xl font-extrabold text-[#141413]">重点关注学生</h1>
+        <p className="mt-1 text-sm text-[#6B7280]">仅显示本周出现“未交”的学生，并按相同提醒话术分组。</p>
       </div>
       <div className="p-5">
         {groups.length === 0 ? (
-          <div className="rounded-md border border-[#D0D7DE] bg-[#F7F9FC] px-4 py-8 text-center text-slate-500">本周没有重点关注学生。</div>
+          <div className="rounded-md border border-[#E8E6E1] bg-[#FAF9F6] px-4 py-8 text-center text-[#6B7280]">本周没有重点关注学生。</div>
         ) : (
           <div className="space-y-5">
             {groups.map((group, index) => (
-              <section key={group.reminder} className="overflow-hidden rounded-md border border-[#D0D7DE]">
-                <div className="bg-[#F3F6FA] px-4 py-4">
+              <section key={group.reminder} className="overflow-hidden rounded-md border border-[#E8E6E1]">
+                <div className="bg-[#FAF9F6] px-4 py-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                      <h2 className="font-extrabold text-slate-800">
+                      <h2 className="font-extrabold text-[#141413]">
                         话术 {index + 1}｜{group.students.length} 人
                       </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">{group.reminder}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 text-[#141413]">{group.reminder}</p>
+                      <p className="mt-2 text-sm leading-6 text-[#6B7280]">
                         群发对象：{group.students.map((student) => `${student.className}${student.name}`).join("、")}
                       </p>
                     </div>
@@ -114,22 +114,22 @@ export function TeacherPasswordGate({ reportId }: { reportId: string }) {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px] border-collapse text-sm">
                     <thead>
-                      <tr className="bg-[#D9EAF7] text-slate-800">
-                        <th className="border border-[#D0D7DE] px-3 py-3 text-left">班级</th>
-                        <th className="border border-[#D0D7DE] px-3 py-3 text-left">学号</th>
-                        <th className="border border-[#D0D7DE] px-3 py-3 text-left">姓名</th>
-                        <th className="border border-[#D0D7DE] px-3 py-3 text-left">未交日期</th>
-                        <th className="border border-[#D0D7DE] px-3 py-3 text-left">未交次数</th>
+                      <tr className="bg-[#FAF9F6] text-[#141413]">
+                        <th className="border border-[#E8E6E1] px-3 py-3 text-left">班级</th>
+                        <th className="border border-[#E8E6E1] px-3 py-3 text-left">学号</th>
+                        <th className="border border-[#E8E6E1] px-3 py-3 text-left">姓名</th>
+                        <th className="border border-[#E8E6E1] px-3 py-3 text-left">未交日期</th>
+                        <th className="border border-[#E8E6E1] px-3 py-3 text-left">未交次数</th>
                       </tr>
                     </thead>
                     <tbody>
                       {group.students.map((student) => (
-                        <tr key={`${student.className}-${student.studentId}-${student.name}`} className="odd:bg-white even:bg-[#F7F9FC]">
-                          <td className="border border-[#D0D7DE] px-3 py-3 font-bold">{student.className}</td>
-                          <td className="border border-[#D0D7DE] px-3 py-3">{student.studentId}</td>
-                          <td className="border border-[#D0D7DE] px-3 py-3 font-bold">{student.name}</td>
-                          <td className="border border-[#D0D7DE] px-3 py-3 text-[#9C0006]">{student.missingDates.join("、")}</td>
-                          <td className="border border-[#D0D7DE] px-3 py-3 text-[#9C0006]">{student.missingDates.length} 次</td>
+                        <tr key={`${student.className}-${student.studentId}-${student.name}`} className="odd:bg-white even:bg-[#FAF9F6]">
+                          <td className="border border-[#E8E6E1] px-3 py-3 font-bold">{student.className}</td>
+                          <td className="border border-[#E8E6E1] px-3 py-3">{student.studentId}</td>
+                          <td className="border border-[#E8E6E1] px-3 py-3 font-bold">{student.name}</td>
+                          <td className="border border-[#E8E6E1] px-3 py-3 text-[#9C0006]">{student.missingDates.join("、")}</td>
+                          <td className="border border-[#E8E6E1] px-3 py-3 text-[#9C0006]">{student.missingDates.length} 次</td>
                         </tr>
                       ))}
                     </tbody>

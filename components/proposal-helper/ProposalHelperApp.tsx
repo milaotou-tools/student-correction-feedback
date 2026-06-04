@@ -289,20 +289,20 @@ export function ProposalHelperApp() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f8fb] px-4 py-6 text-slate-800 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f6f8fb] px-4 py-6 text-[#141413] sm:px-6 lg:px-8">
       <section className="mx-auto flex max-w-7xl flex-col gap-5">
         <header className="border-b border-[#d8e0e7] pb-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h1 className="text-3xl font-extrabold tracking-normal text-slate-900">课题申报小助手</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-[#6B7280]">
                 帮助教师把课题想法整理成申报书框架，并对草稿进行模拟专家预审与逐栏打磨。
               </p>
             </div>
             <div className="flex w-full flex-col gap-2 lg:w-[340px] lg:items-end">
-              <div className="flex w-full items-center justify-between gap-2 rounded-md border border-[#d8e0e7] bg-white px-3 py-2 text-xs leading-5 text-slate-600 shadow-sm">
+              <div className="flex w-full items-center justify-between gap-2 rounded-md border border-[#d8e0e7] bg-white px-3 py-2 text-xs leading-5 text-[#6B7280]">
                 <span className="min-w-0 truncate">
-                  <span className="font-bold text-slate-700">演示状态：</span>
+                  <span className="font-bold text-[#141413]">演示状态：</span>
                   {health ? (health.keyConfigured ? "模型已就绪" : "模型未配置") : "未检查"}
                   {health ? (
                     <span className={health.keyConfigured ? "ml-2 font-bold text-[#2f6f73]" : "ml-2 font-bold text-red-600"}>
@@ -315,7 +315,7 @@ export function ProposalHelperApp() {
                   type="button"
                   onClick={checkHealth}
                   disabled={isCheckingHealth}
-                  className="focus-ring h-8 shrink-0 rounded-md border border-[#9fbec0] bg-white px-3 text-xs font-bold text-[#2f6f73] transition hover:bg-[#eef6f4] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+                  className="focus-ring h-8 shrink-0 rounded-md border border-[#9fbec0] bg-white px-3 text-xs font-bold text-[#2f6f73] transition hover:bg-[#eef6f4] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-[#9CA3AF]"
                 >
                   {isCheckingHealth ? "检查中..." : "演示前检查"}
                 </button>
@@ -339,10 +339,10 @@ export function ProposalHelperApp() {
           />
         </section>
 
-        <p className="text-sm leading-6 text-slate-600">{activeHint}</p>
+        <p className="text-sm leading-6 text-[#6B7280]">{activeHint}</p>
 
         <section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="rounded-md border border-[#d8e0e7] bg-white p-5 shadow-sm">
+          <div className="rounded-md border border-[#d8e0e7] bg-white p-5">
             {mode === "framework" ? (
               <FrameworkPanel
                 form={frameworkForm}
@@ -392,11 +392,11 @@ export function ProposalHelperApp() {
             )}
           </div>
 
-          <section className="min-h-[560px] rounded-md border border-[#d8e0e7] bg-white shadow-sm">
+          <section className="min-h-[560px] rounded-md border border-[#d8e0e7] bg-white">
             <div className="flex flex-col gap-3 border-b border-[#e2e8f0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-extrabold tracking-normal text-slate-900">{result?.title || "输出结果"}</h2>
-                <p className="mt-1 text-sm text-slate-500">结果仅用于辅助结构化和修改，需结合真实教学材料继续完善。</p>
+                <p className="mt-1 text-sm text-[#6B7280]">结果仅用于辅助结构化和修改，需结合真实教学材料继续完善。</p>
               </div>
               <CopyResultButton text={resultText} />
             </div>
@@ -423,7 +423,7 @@ export function ProposalHelperApp() {
               {isLoading ? (
                 <div
                   aria-live="polite"
-                  className="rounded-md border border-[#d8e0e7] bg-[#f8fafc] px-4 py-8 text-center text-sm text-slate-600"
+                  className="rounded-md border border-[#d8e0e7] bg-[#f8fafc] px-4 py-8 text-center text-sm text-[#6B7280]"
                 >
                   {loadingSteps[loadingStepIndex]}，请稍候...
                 </div>
@@ -458,12 +458,12 @@ function ModeButton({
       className={[
         "focus-ring rounded-md border p-4 text-left transition",
         active
-          ? "border-[#2f6f73] bg-[#edf7f5] shadow-sm"
+          ? "border-[#2f6f73] bg-[#edf7f5]"
           : "border-[#d8e0e7] bg-white hover:border-[#a9c6c7] hover:bg-[#f8fbfb]"
       ].join(" ")}
     >
       <span className="block text-base font-extrabold text-slate-900">{title}</span>
-      <span className="mt-1 block text-sm text-slate-600">{description}</span>
+      <span className="mt-1 block text-sm text-[#6B7280]">{description}</span>
     </button>
   );
 }
@@ -487,7 +487,7 @@ function FrameworkPanel({
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-lg font-extrabold tracking-normal text-slate-900">从课题想法生成框架</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">尽量填写真实教学问题。信息不足时，输出会提示需补充。</p>
+        <p className="mt-1 text-sm leading-6 text-[#6B7280]">尽量填写真实教学问题。信息不足时，输出会提示需补充。</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -504,7 +504,7 @@ function FrameworkPanel({
         <button
           type="button"
           onClick={onClear}
-          className="focus-ring rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
+          className="focus-ring rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-[#6B7280] hover:bg-slate-50"
         >
           重新填写
         </button>
@@ -592,7 +592,7 @@ function DraftPanel({
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-lg font-extrabold tracking-normal text-slate-900">申报书草稿打磨</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">先看问题，再逐栏修改，最后可生成模拟专家预审意见。</p>
+        <p className="mt-1 text-sm leading-6 text-[#6B7280]">先看问题，再逐栏修改，最后可生成模拟专家预审意见。</p>
         <p className="mt-1 text-sm font-bold leading-6 text-[#7a5c24]">
           建议顺序：先问题诊断，再逐栏打磨，最后模拟专家预审。
         </p>
@@ -612,18 +612,18 @@ function DraftPanel({
         <button
           type="button"
           onClick={onClear}
-          className="focus-ring rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
+          className="focus-ring rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-[#6B7280] hover:bg-slate-50"
         >
           重新填写
         </button>
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="text-sm font-bold text-slate-700">打磨范围</span>
+        <span className="text-sm font-bold text-[#141413]">打磨范围</span>
         <select
           value={scope}
           onChange={(event) => onScopeChange(event.target.value)}
-          className="focus-ring h-11 rounded-md border border-[#c7d6df] bg-white px-3 text-sm text-slate-800"
+          className="focus-ring h-11 rounded-md border border-[#c7d6df] bg-white px-3 text-sm text-[#141413]"
         >
           {draftScopes.map((item) => (
             <option key={item} value={item}>
@@ -640,7 +640,7 @@ function DraftPanel({
         rows={16}
         onChange={onDraftChange}
       />
-      <p className="text-xs leading-5 text-slate-500">
+      <p className="text-xs leading-5 text-[#6B7280]">
         请不要粘贴学生身份证号、手机号、家庭住址等敏感信息。
       </p>
 
@@ -668,7 +668,7 @@ function TextInput({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-bold text-slate-700">
+      <span className="text-sm font-bold text-[#141413]">
         {label}
         {required ? <span className="ml-2 rounded-sm bg-[#fff1cc] px-1.5 py-0.5 text-xs text-[#7a5c24]">必填</span> : null}
       </span>
@@ -678,7 +678,7 @@ function TextInput({
         onChange={(event) => onChange(event.target.value)}
         name={label}
         autoComplete="off"
-        className="focus-ring h-11 rounded-md border border-[#c7d6df] bg-white px-3 text-sm text-slate-800 placeholder:text-slate-400"
+        className="focus-ring h-11 rounded-md border border-[#c7d6df] bg-white px-3 text-sm text-[#141413] placeholder:text-[#9CA3AF]"
       />
       {required && !value.trim() ? <span className="text-xs text-[#7a5c24]">生成前需要填写这一项。</span> : null}
     </label>
@@ -702,7 +702,7 @@ function TextArea({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-bold text-slate-700">
+      <span className="text-sm font-bold text-[#141413]">
         {label}
         {required ? <span className="ml-2 rounded-sm bg-[#fff1cc] px-1.5 py-0.5 text-xs text-[#7a5c24]">必填</span> : null}
       </span>
@@ -713,7 +713,7 @@ function TextArea({
         onChange={(event) => onChange(event.target.value)}
         name={label}
         autoComplete="off"
-        className="focus-ring resize-y rounded-md border border-[#c7d6df] bg-white px-3 py-3 text-sm leading-6 text-slate-800 placeholder:text-slate-400"
+        className="focus-ring resize-y rounded-md border border-[#c7d6df] bg-white px-3 py-3 text-sm leading-6 text-[#141413] placeholder:text-[#9CA3AF]"
       />
       {required && !value.trim() ? <span className="text-xs text-[#7a5c24]">生成前需要填写这一项。</span> : null}
     </label>
@@ -743,7 +743,7 @@ function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`focus-ring h-11 rounded-md px-4 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 ${className}`}
+      className={`focus-ring h-11 rounded-md px-4 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-[#9CA3AF] ${className}`}
     >
       {disabled ? "处理中..." : label}
     </button>
@@ -768,7 +768,7 @@ function CopyResultButton({ text }: { text: string }) {
       type="button"
       onClick={handleCopy}
       disabled={!text}
-      className="focus-ring h-10 rounded-md border border-[#9fbec0] bg-white px-4 text-sm font-bold text-[#2f6f73] transition hover:bg-[#eef6f4] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+      className="focus-ring h-10 rounded-md border border-[#9fbec0] bg-white px-4 text-sm font-bold text-[#2f6f73] transition hover:bg-[#eef6f4] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-[#9CA3AF]"
     >
       {copied ? "已复制" : "复制结果"}
     </button>
@@ -831,7 +831,7 @@ function renderMarkdownLine(line: string, key: string) {
 
   if (trimmed.startsWith("- ") || /^\d+\.\s/.test(trimmed)) {
     return (
-      <p key={key} className="pl-4 text-slate-700">
+      <p key={key} className="pl-4 text-[#141413]">
         {trimmed}
       </p>
     );
@@ -844,7 +844,7 @@ function MarkdownLike({ text }: { text: string }) {
   const sections = splitMarkdownSections(text);
 
   return (
-    <article className="space-y-3 text-sm leading-7 text-slate-700">
+    <article className="space-y-3 text-sm leading-7 text-[#141413]">
       {sections.map((section, sectionIndex) => {
         const headingText = section.heading.replace(/^#{1,2}\s+/, "");
         const sectionText = [headingText, ...section.content].join("\n").trim();
@@ -872,8 +872,8 @@ function MarkdownLike({ text }: { text: string }) {
 function EmptyResult() {
   return (
     <div className="rounded-md border border-dashed border-[#c7d6df] bg-[#f8fafc] px-5 py-10 text-center">
-      <h3 className="text-base font-extrabold text-slate-800">等待生成</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+      <h3 className="text-base font-extrabold text-[#141413]">等待生成</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#6B7280]">
         填写左侧内容后生成。输出会尽量按申报书栏目呈现，便于现场讲解、复制和继续修改。
       </p>
     </div>

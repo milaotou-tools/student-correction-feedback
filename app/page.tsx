@@ -2,56 +2,70 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#F7F9FC] px-5 py-10">
-      <section className="mx-auto flex max-w-5xl flex-col gap-8">
-        <div className="border-b border-[#D0D7DE] pb-6">
-          <p className="text-sm font-bold text-[#2F4F68]">达达教学工具台</p>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-normal text-slate-800">
+    <main className="min-h-screen bg-[#FAF9F6] px-5 py-12">
+      <section className="mx-auto flex max-w-4xl flex-col gap-8">
+        <div className="border-b border-[#E8E6E1] pb-6">
+          <p className="text-[11px] font-medium tracking-[0.15em] text-[#6B7280] uppercase">
+            Teaching Tools
+          </p>
+          <h1 className="mt-3 text-[28px] font-bold tracking-[-0.02em] text-[#141413]">
             达达教学工具台
           </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6B7280]">
             三个功能独立使用，数据互不混用。需要处理订正情况时进入"一周订正"，需要分析考试成绩时进入"成绩分析报告"，需要整理课题申报思路时进入"课题申报小助手"。
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          <section className="rounded-md border border-[#D0D7DE] bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-[#2F4F68]">订正反馈</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-normal text-slate-800">一周订正</h2>
-            <p className="mt-3 min-h-24 text-sm leading-6 text-slate-600">
-              上传学生订正情况 Excel，生成家长反馈图和教师内部跟进名单。适合每周检查作业订正、提醒未完成学生。
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+              订正反馈
+            </p>
+            <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
+              一周订正
+            </h2>
+            <p className="mt-3 min-h-[5.5rem] text-sm leading-6 text-[#6B7280]">
+              上传学生订正情况 Excel，生成家长反馈图和教师内部跟进名单。
             </p>
             <Link
               href="/upload"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[#2F4F68] px-5 text-sm font-bold text-white transition hover:bg-[#244055]"
+              className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-[#141413] px-5 text-sm font-medium text-white transition hover:bg-[#2A2A28]"
             >
               进入一周订正
             </Link>
           </section>
 
-          <section className="rounded-md border border-[#D0D7DE] bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-[#6B5B2E]">考试分析</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-normal text-slate-800">成绩分析报告</h2>
-            <p className="mt-3 min-h-24 text-sm leading-6 text-slate-600">
-              上传成绩单，查看分数段、进退步、小零食奖励名单、家长沟通话术和加强关注名单。
+          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+              考试分析
+            </p>
+            <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
+              成绩分析报告
+            </h2>
+            <p className="mt-3 min-h-[5.5rem] text-sm leading-6 text-[#6B7280]">
+              上传成绩单，查看分数段、进退步、小零食奖励名单和加强关注名单。
             </p>
             <Link
               href="/grade-upload"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[#7A5C24] px-5 text-sm font-bold text-white transition hover:bg-[#604717]"
+              className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-[#141413] px-5 text-sm font-medium text-white transition hover:bg-[#2A2A28]"
             >
               进入成绩分析
             </Link>
           </section>
 
-          <section className="rounded-md border border-[#D0D7DE] bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-[#2D6A4F]">课题研究</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-normal text-slate-800">课题申报小助手</h2>
-            <p className="mt-3 min-h-24 text-sm leading-6 text-slate-600">
-              从课题想法生成申报书框架，对已有草稿进行整体诊断、逐栏打磨和模拟专家预审。适合校本研修现场演示和教师独立梳理申报思路。
+          <section className="rounded-md border border-[#E8E6E1] bg-white p-6">
+            <p className="text-[11px] font-medium tracking-[0.12em] text-[#6B7280] uppercase">
+              课题研究
+            </p>
+            <h2 className="mt-2 text-xl font-bold tracking-[-0.01em] text-[#141413]">
+              课题申报小助手
+            </h2>
+            <p className="mt-3 min-h-[5.5rem] text-sm leading-6 text-[#6B7280]">
+              从课题想法生成申报书框架，对已有草稿进行整体诊断、逐栏打磨和模拟专家预审。
             </p>
             <Link
               href="/proposal-helper"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[#2D6A4F] px-5 text-sm font-bold text-white transition hover:bg-[#1F4D38]"
+              className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-[#141413] px-5 text-sm font-medium text-white transition hover:bg-[#2A2A28]"
             >
               进入课题申报小助手
             </Link>

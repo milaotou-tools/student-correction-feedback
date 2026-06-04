@@ -8,9 +8,9 @@
 
 body {
   margin: 0;
-  background: #f7f9fc;
-  color: #1f2937;
-  font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #faf9f6;
+  color: #111827;
+  font-family: Inter, "Noto Sans SC", sans-serif;
   overflow-x: hidden;
 }
 
@@ -24,5 +24,5 @@ input {
 }
 
 .focus-ring:focus-visible {
-  box-shadow: 0 0 0 3px rgba(47, 79, 104, 0.22);
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.3);
 }
