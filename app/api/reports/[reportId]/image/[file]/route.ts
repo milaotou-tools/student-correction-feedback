@@ -12,7 +12,7 @@ export async function GET(request: Request, context: RouteContext) {
   const { reportId, file } = await context.params;
   const safeFile = file.split("/").pop();
   const version = new URL(request.url).searchParams.get("v");
-  const shouldRegenerate = version === "browser-png-v3";
+  const shouldRegenerate = version === "browser-png-v4";
 
   if (!safeFile) {
     return NextResponse.json({ error: "Invalid file name" }, { status: 400 });

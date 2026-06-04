@@ -1,6 +1,5 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { pathToFileURL } from "url";
 import serverlessChromium from "@sparticuz/chromium";
 import { chromium as playwrightChromium, type Browser } from "playwright";
 import { getClassImageFileName, saveReportImage } from "./storage";
@@ -31,16 +30,24 @@ function escapeHtml(value: unknown): string {
 
 async function getFontCss(): Promise<string> {
   const fontRoot = path.join(process.cwd(), "node_modules", "@fontsource", "noto-sans-sc");
-  const filesUrl = `${pathToFileURL(path.join(fontRoot, "files")).href}/`;
-  const cssFiles = ["chinese-simplified-400.css", "chinese-simplified-700.css"];
-  const css = await Promise.all(
-    cssFiles.map(async (file) => {
-      const content = await fs.readFile(path.join(fontRoot, file), "utf8");
-      return content.replace(/url\(\.\/files\/([^)]+)\)/g, (_match, fontFile: string) => `url("${filesUrl}${fontFile}")`);
+  const fonts = [
+    { weight: 400, file: "noto-sans-sc-chinese-simplified-400-normal.woff2" },
+    { weight: 700, file: "noto-sans-sc-chinese-simplified-700-normal.woff2" }
+  ];
+  const faces = await Promise.all(
+    fonts.map(async ({ weight, file }) => {
+      const font = await fs.readFile(path.join(fontRoot, "files", file));
+      return `@font-face {
+        font-family: "Noto Sans SC";
+        font-style: normal;
+        font-display: block;
+        font-weight: ${weight};
+        src: url("data:font/woff2;base64,${font.toString("base64")}") format("woff2");
+      }`;
     })
   );
 
-  return css.join("\n");
+  return faces.join("\n");
 }
 
 function getDateWidth(reportData: ReportData): number {
