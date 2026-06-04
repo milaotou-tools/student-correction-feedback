@@ -12,7 +12,7 @@ export function buildReviewDraftPrompt(input: ReviewDraftInput) {
       "只输出指定栏目内容，不要输出开场白、免责声明、客套语或总结性套话。"
     ].join("\n"),
     user: [
-      `诊断范围：${input.scope || "整体诊断"}`,
+      `${input.scope && input.scope !== "整体诊断" && input.scope !== "整体" ? `诊断范围：只诊断"${input.scope}"这一栏。` : "诊断范围：整份申报书（所有栏目）"}`,
       "",
       "申报书草稿：",
       input.draft,

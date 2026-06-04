@@ -644,10 +644,21 @@ function DraftPanel({
         请不要粘贴学生身份证号、手机号、家庭住址等敏感信息。
       </p>
 
-      <div className="grid gap-2 sm:grid-cols-3">
-        <ActionButton label="问题诊断" onClick={onReview} disabled={isLoading} variant="primary" />
-        <ActionButton label="逐栏打磨" onClick={onPolish} disabled={isLoading} variant="secondary" />
-        <ActionButton label="模拟专家预审" onClick={onExpertReview} disabled={isLoading} variant="warm" />
+      <div className="flex flex-col gap-2">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <ActionButton label="问题诊断" onClick={onReview} disabled={isLoading} isLoading={isLoading} variant="primary" />
+          <ActionButton
+            label="逐栏打磨"
+            onClick={onPolish}
+            disabled={isLoading || scope === "整体诊断"}
+            isLoading={isLoading}
+            variant="secondary"
+          />
+          <ActionButton label="模拟专家预审" onClick={onExpertReview} disabled={isLoading} isLoading={isLoading} variant="warm" />
+        </div>
+        {scope === "整体诊断" ? (
+          <p className="text-xs text-[#6B7280]">逐栏打磨需在上方选择具体栏目（如"选题依据""研究内容"等）。全文润色请用"问题诊断"了解全局问题后，再逐栏处理。</p>
+        ) : null}
       </div>
     </div>
   );
@@ -724,11 +735,13 @@ function ActionButton({
   label,
   onClick,
   disabled,
+  isLoading,
   variant
 }: {
   label: string;
   onClick: () => void;
   disabled: boolean;
+  isLoading: boolean;
   variant: "primary" | "secondary" | "warm";
 }) {
   const className =
@@ -745,7 +758,7 @@ function ActionButton({
       disabled={disabled}
       className={`focus-ring h-11 rounded-md px-4 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:border-[#E8E6E1] disabled:bg-[#E8E6E1] disabled:text-[#9CA3AF] ${className}`}
     >
-      {disabled ? "处理中..." : label}
+      {isLoading ? "处理中..." : label}
     </button>
   );
 }
