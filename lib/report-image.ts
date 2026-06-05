@@ -206,8 +206,17 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
 
 async function launchBrowser(): Promise<Browser> {
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+  if (isServerless && !process.env.AWS_LAMBDA_JS_RUNTIME) {
+    process.env.AWS_LAMBDA_JS_RUNTIME = "nodejs22.x";
+  }
+
+  const args = isServerless
+    ? [...serverlessChromium.args, "--disable-dev-shm-usage", "--disable-gpu"]
+    : [];
+
   return playwrightChromium.launch({
-    args: isServerless ? serverlessChromium.args : [],
+    args,
     executablePath: isServerless ? await serverlessChromium.executablePath() : undefined,
     headless: true
   });
@@ -216,26 +225,52 @@ async function launchBrowser(): Promise<Browser> {
 export async function renderFeedbackPngBuffer(reportData: ReportData, classReport: ClassReport, browser?: Browser): Promise<Buffer> {
   const fontCss = await getFontCss();
   const { html, height } = renderFeedbackHtml(reportData, classReport, fontCss);
-  const ownsBrowser = !browser;
-  const activeBrowser = browser ?? (await launchBrowser());
-  const page = await activeBrowser.newPage({
-    viewport: { width: REPORT_WIDTH, height },
-    deviceScaleFactor: 1
-  });
 
-  try {
-    await page.setContent(html, { waitUntil: "networkidle" });
-    await page.evaluate(() => document.fonts.ready);
-    const element = await page.$("#feedback-image");
-    if (!element) {
-      throw new Error("Feedback image root not found");
+  async function render(activeBrowser: Browser): Promise<Buffer> {
+    const page = await activeBrowser.newPage({
+      viewport: { width: REPORT_WIDTH, height },
+      deviceScaleFactor: 1
+    });
+
+    try {
+      await page.setContent(html, { waitUntil: "networkidle" });
+      await page.evaluate(() => document.fonts.ready);
+      const element = await page.$("#feedback-image");
+      if (!element) {
+        throw new Error("Feedback image root not found");
+      }
+      return Buffer.from(await element.screenshot({ type: "png" }));
+    } finally {
+      await page.close().catch(() => undefined);
     }
-    return Buffer.from(await element.screenshot({ type: "png" }));
-  } finally {
-    await page.close().catch(() => undefined);
-    if (ownsBrowser) {
+  }
+
+  async function renderWithRetry(activeBrowser: Browser, ownsBrowser: boolean): Promise<Buffer> {
+    try {
+      return await render(activeBrowser);
+    } catch (firstError) {
+      if (!ownsBrowser) throw firstError;
       await activeBrowser.close().catch(() => undefined);
+      const retryBrowser = await launchBrowser();
+      // The caller's finally will close activeBrowser (already closed — harmless)
+      // but we need to close retryBrowser ourselves
+      try {
+        return await render(retryBrowser);
+      } finally {
+        await retryBrowser.close().catch(() => undefined);
+      }
     }
+  }
+
+  if (browser) {
+    return renderWithRetry(browser, false);
+  }
+
+  const activeBrowser = await launchBrowser();
+  try {
+    return await renderWithRetry(activeBrowser, true);
+  } finally {
+    await activeBrowser.close().catch(() => undefined);
   }
 }
 
@@ -246,10 +281,16 @@ export async function generateFeedbackPng(reportData: ReportData, classReport: C
 }
 
 export async function generateAllFeedbackPngs(reportData: ReportData): Promise<void> {
-  const browser = await launchBrowser();
+  let browser = await launchBrowser();
   try {
     for (let index = 0; index < reportData.classes.length; index += 1) {
-      await generateFeedbackPng(reportData, reportData.classes[index], index, browser);
+      try {
+        await generateFeedbackPng(reportData, reportData.classes[index], index, browser);
+      } catch {
+        await browser.close().catch(() => undefined);
+        browser = await launchBrowser();
+        await generateFeedbackPng(reportData, reportData.classes[index], index, browser);
+      }
     }
   } finally {
     await browser.close().catch(() => undefined);
