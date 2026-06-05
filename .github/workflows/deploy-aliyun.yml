@@ -13,8 +13,8 @@ concurrency:
 env:
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
-  APP_PORT: "3007"
-  EXTERNAL_PORT: "8084"
+  APP_PORT: "3002"
+  EXTERNAL_PORT: "8082"
 
 jobs:
   deploy:
@@ -51,22 +51,26 @@ jobs:
           ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" '
           set -e
           PM2="student-correction-feedback"
-          PORT="3007"
+          PORT="3002"
           DEPLOY="/www/wwwroot/student-correction-feedback"
 
-          # stop pm2 + free port
+          # stop pm2 + clean saved state
           pm2 delete "$PM2" 2>/dev/null || true
           pm2 save --force
+          # clear any saved PM2 state that might resurrect old processes
+          rm -f /root/.pm2/dump.pm2 2>/dev/null || true
           sleep 2
-          # kill anything on the port (IPv4 + IPv6)
+          # kill everything on the port
           fuser -k "$PORT/tcp" 2>/dev/null || true
+          sleep 1
           fuser -k -6 "$PORT/tcp" 2>/dev/null || true
-          # fallback: use lsof
-          lsof -ti:"$PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
-          sleep 3
-          # verify port is free
-          if fuser "$PORT/tcp" 2>/dev/null; then
-            echo "WARNING: port $PORT still in use, trying once more"
+          sleep 1
+          lsof -ti:"$PORT" 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+          sleep 2
+          # verify port is truly free
+          if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+            echo "WARNING: port $PORT still in use"
+            ss -tlnp | grep ":$PORT "
             fuser -k -9 "$PORT/tcp" 2>/dev/null || true
             sleep 3
           fi
