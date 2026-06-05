@@ -1,4 +1,4 @@
-name: Deploy to Aliyun
+name: Deploy to Aliyun (SCP)
 
 on:
   push:
@@ -8,15 +8,13 @@ on:
 
 concurrency:
   group: aliyun-deploy-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
-  APP_NAME: student-correction-feedback
-  REPO_URL: https://github.com/milaotou-tools/student-correction-feedback.git
-  BRANCH: main
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
   APP_PORT: "3002"
+  EXTERNAL_PORT: "8082"
 
 jobs:
   deploy:
@@ -25,6 +23,8 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -32,37 +32,69 @@ jobs:
 
       - name: Trust server host key
         env:
-          ALIYUN_PORT: ${{ secrets.ALIYUN_PORT }}
+          SSH_PORT: ${{ secrets.ALIYUN_PORT }}
         run: |
-          SSH_PORT="${ALIYUN_PORT:-22}"
           mkdir -p ~/.ssh
           ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.ALIYUN_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy on Aliyun
+      - name: Tar and SCP
         env:
-          ALIYUN_PORT: ${{ secrets.ALIYUN_PORT }}
-          GITHUB_TOKEN: ${{ github.token }}
+          SSH_PORT: ${{ secrets.ALIYUN_PORT }}
         run: |
-          SSH_PORT="${ALIYUN_PORT:-22}"
-          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "APP_NAME='${APP_NAME}' REPO_URL='${REPO_URL}' BRANCH='${BRANCH}' DEPLOY_PATH='${DEPLOY_PATH}' PM2_NAME='${PM2_NAME}' APP_PORT='${APP_PORT}' GITHUB_TOKEN='${GITHUB_TOKEN}' bash -s" <<'EOF'
-          set -euo pipefail
+          tar --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.env' -czf /tmp/deploy.tar.gz .
+          scp -P "$SSH_PORT" /tmp/deploy.tar.gz "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}:/tmp/deploy.tar.gz"
 
-          mkdir -p "$DEPLOY_PATH"
-          cd "$DEPLOY_PATH"
-          git config --global --add safe.directory "$DEPLOY_PATH" >/dev/null 2>&1 || true
-          if [ -n "${GITHUB_TOKEN:-}" ]; then
-            git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - name: Build and restart
+        env:
+          SSH_PORT: ${{ secrets.ALIYUN_PORT }}
+        run: |
+          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" '
+          set -e
+          PM2="student-correction-feedback"
+          PORT="3002"
+          DEPLOY="/www/wwwroot/student-correction-feedback"
+
+          # stop pm2 + free port
+          pm2 delete "$PM2" 2>/dev/null || true
+          pm2 save --force
+          sleep 2
+          fuser -k "$PORT/tcp" 2>/dev/null || true
+          sleep 2
+
+          # clean old build
+          cd "$DEPLOY"
+          rm -rf .next
+
+          # extract source
+          tar -xzf /tmp/deploy.tar.gz
+          rm /tmp/deploy.tar.gz
+
+          # create .env if missing (DeepSeek keys from proposal-helper)
+          if [ ! -f .env ]; then
+            cat > .env << '"'"'ENVEOF'"'"'
+          DEEPSEEK_API_KEY=sk-97020bc355174f6caaf3bf4d11619ada
+          DEEPSEEK_BASE_URL=https://api.deepseek.com
+          DEEPSEEK_MODEL=deepseek-v4-pro
+          TEACHER_PAGE_PASSWORD=dada123
+          ENVEOF
           fi
 
-          if [ ! -d ".git" ]; then
-            if [ -n "$(ls -A . 2>/dev/null)" ]; then
-              echo "[deploy] first deploy path is not empty: $DEPLOY_PATH"
-              exit 1
-            fi
-            echo "[deploy] first deploy: cloning repository"
-            git clone -b "$BRANCH" "$REPO_URL" .
-          fi
+          # install + build
+          npm ci
 
-          chmod +x deploy.sh
-          ./deploy.sh
-          EOF
+          # install Playwright Chromium for report image generation
+          npx playwright install-deps chromium 2>/dev/null || true
+          npx playwright install chromium
+
+          npm run build
+
+          # start
+          pm2 start npx --name "$PM2" -- next start -p "$PORT"
+          pm2 save
+
+          # clear nginx cache
+          find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
+          nginx -s reload
+
+          echo "[deploy] done, port=$PORT"
+          '
