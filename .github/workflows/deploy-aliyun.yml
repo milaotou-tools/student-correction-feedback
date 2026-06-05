@@ -116,15 +116,28 @@ jobs:
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
-          # ensure nginx proxies port 3002 -> 3007
-          NGINX_PROXY="/www/server/panel/vhost/nginx/proxy/116.62.220.255"
-          if [ -f "$NGINX_PROXY/3002.conf" ]; then
-            sed -i "s|proxy_pass http://127.0.0.1:[0-9]*;|proxy_pass http://127.0.0.1:3007;|g" "$NGINX_PROXY/3002.conf"
-          fi
-          # also check the domain-based proxy dir
-          if [ -f "/www/server/panel/vhost/nginx/proxy/3002.conf" ]; then
-            sed -i "s|proxy_pass http://127.0.0.1:[0-9]*;|proxy_pass http://127.0.0.1:3007;|g" "/www/server/panel/vhost/nginx/proxy/3002.conf"
-          fi
+          # find and fix nginx proxy config
+          echo "=== finding nginx proxy configs ==="
+          find /www/server/panel/vhost/nginx/proxy -name "*.conf" 2>/dev/null | head -20 || true
+          echo "=== checking proxy conf content ==="
+          for f in $(find /www/server/panel/vhost/nginx/proxy -name "*.conf" 2>/dev/null); do
+            if grep -q "3002\|3007" "$f" 2>/dev/null; then
+              echo "--- $f ---"
+              grep -n "listen\|proxy_pass\|server_name" "$f" 2>/dev/null || true
+            fi
+          done
+          echo "=== checking nginx sites ==="
+          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | xargs grep -l "3002\|3007" 2>/dev/null | head -10 || true
+
+          # try to fix the proxy to point to our running port
+          for f in $(find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null); do
+            if grep -q "proxy_pass.*127.0.0.1" "$f" 2>/dev/null; then
+              if grep -q "listen.*3002\|listen.*3007" "$f" 2>/dev/null; then
+                echo "fixing $f"
+                sed -i "s|proxy_pass http://127.0.0.1:[0-9]*;|proxy_pass http://127.0.0.1:3007;|g" "$f"
+              fi
+            fi
+          done
 
           # clear nginx cache
           find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
