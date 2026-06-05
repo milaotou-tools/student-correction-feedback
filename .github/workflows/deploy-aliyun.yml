@@ -58,8 +58,18 @@ jobs:
           pm2 delete "$PM2" 2>/dev/null || true
           pm2 save --force
           sleep 2
+          # kill anything on the port (IPv4 + IPv6)
           fuser -k "$PORT/tcp" 2>/dev/null || true
-          sleep 2
+          fuser -k -6 "$PORT/tcp" 2>/dev/null || true
+          # fallback: use lsof
+          lsof -ti:"$PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
+          sleep 3
+          # verify port is free
+          if fuser "$PORT/tcp" 2>/dev/null; then
+            echo "WARNING: port $PORT still in use, trying once more"
+            fuser -k -9 "$PORT/tcp" 2>/dev/null || true
+            sleep 3
+          fi
 
           # clean old build
           cd "$DEPLOY"
