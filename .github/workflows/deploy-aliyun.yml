@@ -116,17 +116,41 @@ jobs:
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
-          # fix ALL nginx configs that proxy to old ports - point them to our running port
-          echo "=== fixing all nginx proxy_pass ==="
+          # fix nginx proxy_pass for OUR ports (3002 / 80 → 3007)
+          # but do NOT change port 8083 (proposal-helper → 3005)
+          echo "=== fixing nginx proxy_pass for student-correction-feedback ==="
           find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
             if grep -q "proxy_pass.*127.0.0.1" "$f" 2>/dev/null; then
-              echo "fixing $f"
-              sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$f"
+              # skip proposal-helper server blocks
+              if grep -q "listen.*8083" "$f" 2>/dev/null; then
+                echo "skipping $f (contains proposal-helper port 8083)"
+              else
+                echo "fixing $f"
+                sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$f"
+              fi
             fi
           done
-          # also check main nginx conf
-          if [ -f /www/server/nginx/conf/nginx.conf ]; then
-            grep -n "listen.*3002\|proxy_pass" /www/server/nginx/conf/nginx.conf || true
+          # ensure proposal-helper proxy on 8083 → 3005
+          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
+            if grep -q "listen.*8083" "$f" 2>/dev/null; then
+              echo "fixing proposal-helper proxy in $f"
+              sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3005;|g" "$f"
+            fi
+          done
+
+          # ensure proposal-helper is running on port 3005 (if deployed)
+          if [ -d /www/wwwroot/proposal-helper ] && [ -f /www/wwwroot/proposal-helper/package.json ]; then
+            echo "=== restarting proposal-helper ==="
+            cd /www/wwwroot/proposal-helper
+            pm2 delete proposal-helper 2>/dev/null || true
+            sleep 1
+            fuser -k 3005/tcp 2>/dev/null || true
+            sleep 1
+            pm2 start npx --name proposal-helper -- next start -p 3005
+            pm2 save
+            cd "$DEPLOY"
+          else
+            echo "proposal-helper not deployed on this server, skipping"
           fi
 
           # clear nginx cache
