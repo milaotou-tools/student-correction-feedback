@@ -6,16 +6,14 @@ import { getClassImageFileName, saveReportImage } from "./storage";
 import { getAttentionStyle, getStatusStyle } from "./status";
 import type { ClassReport, ReportData, Status } from "./types";
 
-const REPORT_WIDTH = 1600;
+const REPORT_WIDTH = 1420;
 const PADDING_X = 36;
 const TABLE_WIDTH = REPORT_WIDTH - PADDING_X * 2;
 const HEADER_HEIGHT = 44;
 const ROW_HEIGHT = 44;
 const FOOTER_GAP = 14;
 const FOOTER_HEIGHT = 68;
-const ID_WIDTH = 118;
-const NAME_WIDTH = 170;
-const ATTENTION_WIDTH = 190;
+const STUDENT_WIDTH = 248;
 const TOP_SPACE = 150;
 const BOTTOM_SPACE = 34;
 
@@ -51,7 +49,7 @@ async function getFontCss(): Promise<string> {
 }
 
 function getDateWidth(reportData: ReportData): number {
-  return (TABLE_WIDTH - ID_WIDTH - NAME_WIDTH - ATTENTION_WIDTH) / reportData.dates.length;
+  return (TABLE_WIDTH - STUDENT_WIDTH) / reportData.dates.length;
 }
 
 function statusCell(status: Status): string {
@@ -59,11 +57,9 @@ function statusCell(status: Status): string {
   return `<div class="cell" style="height:${ROW_HEIGHT}px;background:${style.background};color:${style.color};font-weight:${style.fontWeight ?? 600};">${escapeHtml(status)}</div>`;
 }
 
-function attentionCell(level: ClassReport["students"][number]["attentionLevel"]): string {
+function attentionBadge(level: ClassReport["students"][number]["attentionLevel"]): string {
   const style = getAttentionStyle(level);
-  return `<div class="cell attention-cell" style="height:${ROW_HEIGHT}px;background:#F3F6FA;">
-    <span class="attention-badge" style="background:${style.background};color:${style.color};border-color:${style.border ?? "#C8C8C8"};font-weight:${style.fontWeight ?? 700};">${escapeHtml(level)}</span>
-  </div>`;
+  return `<span class="attention-badge" style="background:${style.background};color:${style.color};border-color:${style.border ?? "#C8C8C8"};font-weight:${style.fontWeight ?? 700};">${escapeHtml(level)}</span>`;
 }
 
 function headerCell(label: string): string {
@@ -75,23 +71,19 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
   const tableHeight = HEADER_HEIGHT + classReport.students.length * ROW_HEIGHT;
   const footerY = TOP_SPACE + tableHeight + FOOTER_GAP;
   const height = footerY + FOOTER_HEIGHT + BOTTOM_SPACE;
-  const columnWidths = [ID_WIDTH, NAME_WIDTH, ATTENTION_WIDTH, ...reportData.dates.map(() => dateWidth)];
+  const columnWidths = [STUDENT_WIDTH, ...reportData.dates.map(() => dateWidth)];
   const gridColumns = columnWidths.map((width) => `${width}px`).join(" ");
   const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
 
   const header = [
-    headerCell("学号"),
-    headerCell("姓名"),
-    headerCell("关注等级"),
+    headerCell("学生"),
     ...reportData.dates.map((date) => headerCell(date))
   ].join("");
 
   const rows = classReport.students
     .map((student) =>
       [
-        `<div class="cell base-cell" style="height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.studentId)}</div>`,
-        `<div class="cell base-cell" style="height:${ROW_HEIGHT}px;font-weight:700;">${escapeHtml(student.name)}</div>`,
-        attentionCell(student.attentionLevel),
+        `<div class="cell base-cell student-cell" style="height:${ROW_HEIGHT}px;">${escapeHtml(student.studentId)} ${escapeHtml(student.name)} ${attentionBadge(student.attentionLevel)}</div>`,
         ...reportData.dates.map((date) => statusCell(student.statuses[date] ?? ""))
       ].join("")
     )
@@ -164,6 +156,12 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
     .base-cell {
       background: #F3F6FA;
     }
+    .student-cell {
+      font-weight: 700;
+      gap: 6px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
     .attention-badge {
       display: inline-flex;
       align-items: center;
@@ -174,6 +172,7 @@ function renderFeedbackHtml(reportData: ReportData, classReport: ClassReport, fo
       border-radius: 999px;
       font-size: 15px;
       line-height: 20px;
+      flex-shrink: 0;
     }
     .footer {
       width: ${TABLE_WIDTH}px;
