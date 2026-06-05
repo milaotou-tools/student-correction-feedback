@@ -116,16 +116,17 @@ jobs:
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
-          # find and fix ALL nginx proxy configs
-          echo "=== all nginx listen ports ==="
-          SITE_CONF=$(find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | xargs grep -l "3002\|3007" 2>/dev/null | head -1)
-          if [ -n "$SITE_CONF" ]; then
-            wc -l "$SITE_CONF"
-            grep -n "listen\|proxy_pass\|server_name" "$SITE_CONF" || true
-            # fix ALL proxy_pass lines to point to our port
-            sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$SITE_CONF"
-            echo "=== fixed ==="
-            grep -n "listen\|proxy_pass" "$SITE_CONF" || true
+          # fix ALL nginx configs that proxy to old ports - point them to our running port
+          echo "=== fixing all nginx proxy_pass ==="
+          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
+            if grep -q "proxy_pass.*127.0.0.1" "$f" 2>/dev/null; then
+              echo "fixing $f"
+              sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$f"
+            fi
+          done
+          # also check main nginx conf
+          if [ -f /www/server/nginx/conf/nginx.conf ]; then
+            grep -n "listen.*3002\|proxy_pass" /www/server/nginx/conf/nginx.conf || true
           fi
 
           # clear nginx cache
