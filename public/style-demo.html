@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四种设计风格对比 — 达达工具箱</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+  body { background: #e8e8e8; padding: 32px 24px; font-size: 15px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .demo { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+
+  .demo-header { padding: 14px 20px; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .demo-body { padding: 28px 24px 32px; }
+
+  .demo-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .demo-h1 { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 12px; }
+  .demo-p  { line-height: 1.7; margin-bottom: 24px; max-width: 480px; }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } }
+
+  .card { border-radius: 10px; padding: 18px; }
+  .card-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .card-h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; line-height: 1.25; }
+  .card-p  { font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+  .card-btn { display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 16px; border-radius: 6px; font-size: 12px; font-weight: 700; border: none; cursor: default; }
+
+  .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 38px; padding: 0 20px; border-radius: 7px; font-size: 13px; font-weight: 700; border: none; cursor: default; }
+  .btn-outline { background: transparent; }
+
+  .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.08); }
+  .spec-swatch { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+  .spec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .spec-value { font-size: 11px; }
+
+  .dot { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.08); vertical-align: -3px; margin-right: 4px; }
+
+  /* ===== PAPER ===== */
+  .paper { --pri: #111111; --sec: #8B5CF6; --surf: #FFFFFF; --txt: #111827; --card-bg: #F5F5F5; --border: #E0E0E0; }
+  .paper-style .demo-header { background: #111; color: #fff; }
+  .paper-style { background: #fff; }
+  .paper-style .demo-body { font-family: Roboto, 'Noto Sans SC', sans-serif; }
+  .paper-style .demo-h1 { font-family: Montserrat, 'Noto Sans SC', sans-serif; letter-spacing: -0.01em; }
+  .paper-style .demo-label { color: #8B5CF6; font-family: 'PT Mono', monospace; }
+  .paper-style .demo-p { color: #555; }
+  .paper-style .card { background: #F5F5F5; border: 1px solid #E0E0E0; }
+  .paper-style .card-tag { color: #111; }
+  .paper-style .card-h2 { color: #111; }
+  .paper-style .card-p { color: #555; }
+  .paper-style .card-btn { background: #111; color: #fff; }
+  .paper-style .btn { background: #111; color: #fff; }
+  .paper-style .btn-outline { background: transparent; color: #111; border: 2px solid #111; }
+
+  /* ===== FRIENDLY ===== */
+  .friendly-style .demo-header { background: #F2D9DC; color: #6B4A4E; }
+  .friendly-style { background: #FFFBFC; }
+  .friendly-style .demo-body { font-family: 'Noto Serif Display', 'Noto Serif SC', serif; }
+  .friendly-style .demo-h1 { font-family: 'Noto Serif Display', 'Noto Serif SC', serif; }
+  .friendly-style .demo-label { color: #C48289; font-family: 'Space Mono', monospace; }
+  .friendly-style .demo-p { color: #776466; }
+  .friendly-style .card { background: #FFF5F6; border: 1px solid #F5DADF; border-radius: 14px; }
+  .friendly-style .card-tag { color: #C48289; }
+  .friendly-style .card-h2 { color: #4A2F32; }
+  .friendly-style .card-p { color: #776466; }
+  .friendly-style .card-btn { background: #F2D9DC; color: #4A2F32; border-radius: 20px; }
+  .friendly-style .btn { background: #F2D9DC; color: #4A2F32; border-radius: 20px; }
+  .friendly-style .btn-outline { background: transparent; color: #B07A80; border: 2px solid #F2D9DC; border-radius: 20px; }
+  .friendly-style .specs { border-top-color: #F5DADF; }
+
+  /* ===== CLEAN ===== */
+  .clean-style .demo-header { background: #3B82F6; color: #fff; }
+  .clean-style { background: #fff; }
+  .clean-style .demo-body { font-family: Roboto, 'Noto Sans SC', sans-serif; }
+  .clean-style .demo-h1 { font-family: Poppins, 'Noto Sans SC', sans-serif; }
+  .clean-style .demo-label { color: #3B82F6; font-family: Inconsolata, monospace; }
+  .clean-style .demo-p { color: #64748B; }
+  .clean-style .card { background: #F8FAFC; border: 1px solid #E2E8F0; }
+  .clean-style .card-tag { color: #3B82F6; }
+  .clean-style .card-h2 { color: #0F172A; }
+  .clean-style .card-p { color: #64748B; }
+  .clean-style .card-btn { background: #3B82F6; color: #fff; }
+  .clean-style .btn { background: #3B82F6; color: #fff; }
+  .clean-style .btn-outline { background: transparent; color: #3B82F6; border: 2px solid #3B82F6; }
+  .clean-style .specs { border-top-color: #E2E8F0; }
+
+  /* ===== BENTO ===== */
+  .bento-style .demo-header { background: #FAD4C0; color: #6B4A3A; }
+  .bento-style { background: #FFF5E6; }
+  .bento-style .demo-body { font-family: Inter, 'Noto Sans SC', sans-serif; }
+  .bento-style .demo-h1 { font-family: Inter, 'Noto Sans SC', sans-serif; letter-spacing: -0.02em; }
+  .bento-style .demo-label { color: #D4946E; font-family: 'JetBrains Mono', monospace; }
+  .bento-style .demo-p { color: #8B7355; }
+  .bento-style .card { background: #fff; border: 1px solid #F0DDCE; border-radius: 12px; }
+  .bento-style .card-tag { color: #C47E5A; }
+  .bento-style .card-h2 { color: #3A2F28; }
+  .bento-style .card-p { color: #8B7355; }
+  .bento-style .card-btn { background: #FAD4C0; color: #6B4A3A; border-radius: 10px; }
+  .bento-style .btn { background: #FAD4C0; color: #6B4A3A; border-radius: 10px; }
+  .bento-style .btn-outline { background: transparent; color: #6B4A3A; border: 2px solid #FAD4C0; border-radius: 10px; }
+  .bento-style .specs { border-top-color: #F0DDCE; }
+</style>
+</head>
+<body>
+
+<div class="grid">
+
+  <!-- PAPER -->
+  <div class="demo paper-style">
+    <div class="demo-header">Paper · 纸张感</div>
+    <div class="demo-body">
+      <div class="demo-label">达达教学工具台</div>
+      <div class="demo-h1">学生成绩分析报告</div>
+      <div class="demo-p">上传成绩单，查看分数段、进退步、小零食奖励名单、家长沟通话术和加强关注名单。</div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-tag">订正反馈</div>
+          <div class="card-h2">一周订正</div>
+          <div class="card-p">上传学生订正情况 Excel，生成家长反馈图。</div>
+          <div class="card-btn">进入</div>
+        </div>
+        <div class="card">
+          <div class="card-tag">考试分析</div>
+          <div class="card-h2">成绩报告</div>
+          <div class="card-p">上传成绩单，查看分数段和进退步。</div>
+          <div class="card-btn">进入</div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn">加强关注名单</button>
+        <button class="btn">小零食奖励名单</button>
+        <button class="btn-outline">家长沟通话术</button>
+      </div>
+      <div class="specs">
+        <div><div class="spec-label">主色</div><div class="spec-swatch" style="background:#111"></div><div class="spec-value">#111</div></div>
+        <div><div class="spec-label">强调</div><div class="spec-swatch" style="background:#8B5CF6"></div><div class="spec-value">紫</div></div>
+        <div><div class="spec-label">底</div><div class="spec-swatch" style="background:#fff; border:1px solid #ddd;"></div><div class="spec-value">白</div></div>
+        <div><div class="spec-label">字体</div><span style="font-family:Roboto;font-weight:500;font-size:13px;">Roboto</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRIENDLY -->
+  <div class="demo friendly-style">
+    <div class="demo-header">Friendly · 亲和风</div>
+    <div class="demo-body">
+      <div class="demo-label">达达教学工具台</div>
+      <div class="demo-h1">学生成绩分析报告</div>
+      <div class="demo-p">上传成绩单，查看分数段、进退步、小零食奖励名单、家长沟通话术和加强关注名单。</div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-tag">订正反馈</div>
+          <div class="card-h2">一周订正</div>
+          <div class="card-p">上传学生订正情况 Excel，生成家长反馈图。</div>
+          <div class="card-btn">进入</div>
+        </div>
+        <div class="card">
+          <div class="card-tag">考试分析</div>
+          <div class="card-h2">成绩报告</div>
+          <div class="card-p">上传成绩单，查看分数段和进退步。</div>
+          <div class="card-btn">进入</div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn">加强关注名单</button>
+        <button class="btn">小零食奖励名单</button>
+        <button class="btn-outline">家长沟通话术</button>
+      </div>
+      <div class="specs">
+        <div><div class="spec-label">主色</div><div class="spec-swatch" style="background:#F2D9DC"></div><div class="spec-value">柔粉</div></div>
+        <div><div class="spec-label">辅色</div><div class="spec-swatch" style="background:#D9F2D8"></div><div class="spec-value">薄荷</div></div>
+        <div><div class="spec-label">底</div><div class="spec-swatch" style="background:#FFFBFC; border:1px solid #eee;"></div><div class="spec-value">暖白</div></div>
+        <div><div class="spec-label">字体</div><span style="font-family:'Noto Serif Display',serif;font-weight:500;font-size:13px;">Noto Serif</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLEAN -->
+  <div class="demo clean-style">
+    <div class="demo-header">Clean · 极简风</div>
+    <div class="demo-body">
+      <div class="demo-label">达达教学工具台</div>
+      <div class="demo-h1">学生成绩分析报告</div>
+      <div class="demo-p">上传成绩单，查看分数段、进退步、小零食奖励名单、家长沟通话术和加强关注名单。</div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-tag">订正反馈</div>
+          <div class="card-h2">一周订正</div>
+          <div class="card-p">上传学生订正情况 Excel，生成家长反馈图。</div>
+          <div class="card-btn">进入</div>
+        </div>
+        <div class="card">
+          <div class="card-tag">考试分析</div>
+          <div class="card-h2">成绩报告</div>
+          <div class="card-p">上传成绩单，查看分数段和进退步。</div>
+          <div class="card-btn">进入</div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn">加强关注名单</button>
+        <button class="btn">小零食奖励名单</button>
+        <button class="btn-outline">家长沟通话术</button>
+      </div>
+      <div class="specs">
+        <div><div class="spec-label">主色</div><div class="spec-swatch" style="background:#3B82F6"></div><div class="spec-value">蓝</div></div>
+        <div><div class="spec-label">辅色</div><div class="spec-swatch" style="background:#8B5CF6"></div><div class="spec-value">紫</div></div>
+        <div><div class="spec-label">底</div><div class="spec-swatch" style="background:#fff; border:1px solid #ddd;"></div><div class="spec-value">白</div></div>
+        <div><div class="spec-label">字体</div><span style="font-family:Poppins;font-weight:500;font-size:13px;">Poppins</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENTO -->
+  <div class="demo bento-style">
+    <div class="demo-header">Bento · 暖色卡片</div>
+    <div class="demo-body">
+      <div class="demo-label">达达教学工具台</div>
+      <div class="demo-h1">学生成绩分析报告</div>
+      <div class="demo-p">上传成绩单，查看分数段、进退步、小零食奖励名单、家长沟通话术和加强关注名单。</div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-tag">订正反馈</div>
+          <div class="card-h2">一周订正</div>
+          <div class="card-p">上传学生订正情况 Excel，生成家长反馈图。</div>
+          <div class="card-btn">进入</div>
+        </div>
+        <div class="card">
+          <div class="card-tag">考试分析</div>
+          <div class="card-h2">成绩报告</div>
+          <div class="card-p">上传成绩单，查看分数段和进退步。</div>
+          <div class="card-btn">进入</div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn">加强关注名单</button>
+        <button class="btn">小零食奖励名单</button>
+        <button class="btn-outline">家长沟通话术</button>
+      </div>
+      <div class="specs">
+        <div><div class="spec-label">主色</div><div class="spec-swatch" style="background:#FAD4C0"></div><div class="spec-value">暖桃</div></div>
+        <div><div class="spec-label">辅色</div><div class="spec-swatch" style="background:#80A1C1"></div><div class="spec-value">柔蓝</div></div>
+        <div><div class="spec-label">底</div><div class="spec-swatch" style="background:#FFF5E6; border:1px solid #eee;"></div><div class="spec-value">奶油</div></div>
+        <div><div class="spec-label">字体</div><span style="font-family:Inter;font-weight:500;font-size:13px;">Inter</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

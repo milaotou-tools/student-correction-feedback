@@ -13,6 +13,7 @@ type HeaderInfo = {
 const CLASS_NAME_RE = /([一二三四五六七八九十\d]+班)/;
 const DATE_RE = /(\d{1,2})\s*月\s*(\d{1,2})\s*日/;
 const COMPACT_DATE_RE = /(?:^|[^\d])(\d{1,2})(\d{2})(?:[^\d]|$)/;
+const DOT_DATE_RE = /(\d{1,2})\.(\d{1,2})/;
 
 function cleanCell(value: unknown): string {
   return String(value ?? "").trim();
@@ -24,11 +25,24 @@ function normalizeDateLabel(value: unknown): string {
   if (match) return `${Number(match[1])}月${Number(match[2])}日`;
 
   const compactMatch = raw.match(COMPACT_DATE_RE);
-  if (!compactMatch) return "";
-  const month = Number(compactMatch[1]);
-  const day = Number(compactMatch[2]);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return "";
-  return `${month}月${day}日`;
+  if (compactMatch) {
+    const month = Number(compactMatch[1]);
+    const day = Number(compactMatch[2]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${month}月${day}日`;
+    }
+  }
+
+  const dotMatch = raw.match(DOT_DATE_RE);
+  if (dotMatch) {
+    const month = Number(dotMatch[1]);
+    const day = Number(dotMatch[2]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${month}月${day}日`;
+    }
+  }
+
+  return "";
 }
 
 function getDateSortValue(label: string): number {
