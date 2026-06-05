@@ -119,12 +119,11 @@ jobs:
           # fix nginx proxy_pass for OUR ports (3002 / 80 → 3007)
           # but do NOT change port 8083 (proposal-helper → 3005)
           echo "=== fixing nginx proxy_pass for student-correction-feedback ==="
-          # search all files (some BT Panel proxy configs don't have .conf extension)
-          find /www/server/panel/vhost/nginx -type f 2>/dev/null | while read f; do
+          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
             if grep -q "proxy_pass.*127.0.0.1" "$f" 2>/dev/null; then
-              # skip proposal-helper configs (port 8083)
-              if grep -q "8083" "$f" 2>/dev/null; then
-                echo "skipping $f (contains 8083)"
+              # skip proposal-helper server blocks
+              if grep -q "listen.*8083" "$f" 2>/dev/null; then
+                echo "skipping $f (contains proposal-helper port 8083)"
               else
                 echo "fixing $f"
                 sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$f"
@@ -132,10 +131,9 @@ jobs:
             fi
           done
           # ensure proposal-helper proxy on 8083 → 3005
-          echo "=== fixing proposal-helper proxy (8083 → 3005) ==="
-          grep -rl "8083" /www/server/panel/vhost/nginx/ 2>/dev/null | while read f; do
-            if grep -q "proxy_pass" "$f" 2>/dev/null; then
-              echo "fixing $f"
+          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
+            if grep -q "listen.*8083" "$f" 2>/dev/null; then
+              echo "fixing proposal-helper proxy in $f"
               sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3005;|g" "$f"
             fi
           done
