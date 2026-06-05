@@ -13,8 +13,8 @@ concurrency:
 env:
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
-  APP_PORT: "3001"
-  EXTERNAL_PORT: "8082"
+  APP_PORT: "3007"
+  EXTERNAL_PORT: "3002"
 
 jobs:
   deploy:
@@ -51,7 +51,7 @@ jobs:
           ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" '
           set -e
           PM2="student-correction-feedback"
-          PORT="3001"
+          PORT="3007"
           DEPLOY="/www/wwwroot/student-correction-feedback"
 
           # stop pm2 + clean saved state
@@ -115,6 +115,16 @@ jobs:
           echo ""
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
+
+          # ensure nginx proxies port 3002 -> 3007
+          NGINX_PROXY="/www/server/panel/vhost/nginx/proxy/116.62.220.255"
+          if [ -f "$NGINX_PROXY/3002.conf" ]; then
+            sed -i "s|proxy_pass http://127.0.0.1:[0-9]*;|proxy_pass http://127.0.0.1:3007;|g" "$NGINX_PROXY/3002.conf"
+          fi
+          # also check the domain-based proxy dir
+          if [ -f "/www/server/panel/vhost/nginx/proxy/3002.conf" ]; then
+            sed -i "s|proxy_pass http://127.0.0.1:[0-9]*;|proxy_pass http://127.0.0.1:3007;|g" "/www/server/panel/vhost/nginx/proxy/3002.conf"
+          fi
 
           # clear nginx cache
           find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
