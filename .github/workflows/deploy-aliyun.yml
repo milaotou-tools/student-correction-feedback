@@ -116,15 +116,15 @@ jobs:
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
-          # find and fix nginx proxy config for port 3002/3007
-          echo "=== finding nginx sites with 3002 or 3007 ==="
+          # find and fix ALL nginx proxy configs
+          echo "=== all nginx listen ports ==="
           SITE_CONF=$(find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | xargs grep -l "3002\|3007" 2>/dev/null | head -1)
           if [ -n "$SITE_CONF" ]; then
-            echo "=== content of $SITE_CONF ==="
-            head -80 "$SITE_CONF"
-            echo "=== fixing proxy_pass in $SITE_CONF ==="
+            wc -l "$SITE_CONF"
+            grep -n "listen\|proxy_pass\|server_name" "$SITE_CONF" || true
+            # fix ALL proxy_pass lines to point to our port
             sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$SITE_CONF"
-            echo "=== after fix ==="
+            echo "=== fixed ==="
             grep -n "listen\|proxy_pass" "$SITE_CONF" || true
           fi
 
