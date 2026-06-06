@@ -150,11 +150,7 @@ function apiUrl(path: string) {
     return path;
   }
 
-  const basePath = window.location.pathname.startsWith("/student-correction-feedback")
-    ? "/student-correction-feedback"
-    : "";
-
-  return `${basePath}${path}`;
+  return path;
 }
 
 async function postAi(path: string, payload: Record<string, string>) {

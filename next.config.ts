@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/student-correction-feedback",
   trailingSlash: true,
   reactStrictMode: true,
   serverExternalPackages: ["@sparticuz/chromium"],
@@ -20,16 +19,6 @@ const nextConfig: NextConfig = {
       "./node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2",
       "./node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-700-normal.woff2"
     ]
-  },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/student-correction-feedback",
-        permanent: false,
-        basePath: false
-      }
-    ];
   }
 };
 

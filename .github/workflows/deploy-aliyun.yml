@@ -13,8 +13,7 @@ concurrency:
 env:
   DEPLOY_PATH: /www/wwwroot/student-correction-feedback
   PM2_NAME: student-correction-feedback
-  APP_PORT: "3007"
-  EXTERNAL_PORT: "3002"
+  APP_PORT: "3002"
 
 jobs:
   deploy:
@@ -51,62 +50,43 @@ jobs:
           ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" '
           set -e
           PM2="student-correction-feedback"
-          PORT="3007"
+          PORT="3002"
           DEPLOY="/www/wwwroot/student-correction-feedback"
 
-          # stop pm2 + clean saved state
           pm2 delete "$PM2" 2>/dev/null || true
           pm2 save --force
-          # clear any saved PM2 state that might resurrect old processes
           rm -f /root/.pm2/dump.pm2 2>/dev/null || true
+
           sleep 2
-          # kill everything on the port
           fuser -k "$PORT/tcp" 2>/dev/null || true
           sleep 1
           fuser -k -6 "$PORT/tcp" 2>/dev/null || true
           sleep 1
           lsof -ti:"$PORT" 2>/dev/null | xargs -r kill -9 2>/dev/null || true
           sleep 2
-          # verify port is truly free
-          if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
-            echo "WARNING: port $PORT still in use"
-            ss -tlnp | grep ":$PORT "
-            fuser -k -9 "$PORT/tcp" 2>/dev/null || true
-            sleep 3
-          fi
 
-          # clean old build
           cd "$DEPLOY"
           rm -rf .next
 
-          # extract source
           tar -xzf /tmp/deploy.tar.gz
           rm /tmp/deploy.tar.gz
 
-          # create .env if missing (DeepSeek keys from proposal-helper)
           if [ ! -f .env ]; then
-            cat > .env << '"'"'ENVEOF'"'"'
-          DEEPSEEK_API_KEY=sk-97020bc355174f6caaf3bf4d11619ada
-          DEEPSEEK_BASE_URL=https://api.deepseek.com
-          DEEPSEEK_MODEL=deepseek-v4-pro
-          TEACHER_PAGE_PASSWORD=dada123
-          ENVEOF
+            printf '%s\n' \
+              'DEEPSEEK_API_KEY=sk-97020bc355174f6caaf3bf4d11619ada' \
+              'DEEPSEEK_BASE_URL=https://api.deepseek.com' \
+              'DEEPSEEK_MODEL=deepseek-v4-pro' \
+              'TEACHER_PAGE_PASSWORD=dada123' > .env
           fi
 
-          # install + build
           npm ci
-
-          # install Playwright Chromium for report image generation
           npx playwright install-deps chromium 2>/dev/null || true
           npx playwright install chromium
-
           npm run build
 
-          # start
           pm2 start npx --name "$PM2" -- next start -p "$PORT"
           pm2 save
 
-          # wait for next.js to be ready
           sleep 5
           echo "=== pm2 status ==="
           pm2 list
@@ -115,47 +95,6 @@ jobs:
           echo ""
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
-
-          # fix nginx proxy_pass for OUR ports (3002 / 80 → 3007)
-          # but do NOT change port 8083 (proposal-helper → 3005)
-          echo "=== fixing nginx proxy_pass for student-correction-feedback ==="
-          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
-            if grep -q "proxy_pass.*127.0.0.1" "$f" 2>/dev/null; then
-              # skip proposal-helper server blocks
-              if grep -q "listen.*8083" "$f" 2>/dev/null; then
-                echo "skipping $f (contains proposal-helper port 8083)"
-              else
-                echo "fixing $f"
-                sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3007;|g" "$f"
-              fi
-            fi
-          done
-          # ensure proposal-helper proxy on 8083 → 3005
-          find /www/server/panel/vhost/nginx -name "*.conf" 2>/dev/null | while read f; do
-            if grep -q "listen.*8083" "$f" 2>/dev/null; then
-              echo "fixing proposal-helper proxy in $f"
-              sed -i "s|proxy_pass http://127.0.0.1:[0-9]\+;|proxy_pass http://127.0.0.1:3005;|g" "$f"
-            fi
-          done
-
-          # ensure proposal-helper is running on port 3005 (if deployed)
-          if [ -d /www/wwwroot/proposal-helper ] && [ -f /www/wwwroot/proposal-helper/package.json ]; then
-            echo "=== restarting proposal-helper ==="
-            cd /www/wwwroot/proposal-helper
-            pm2 delete proposal-helper 2>/dev/null || true
-            sleep 1
-            fuser -k 3005/tcp 2>/dev/null || true
-            sleep 1
-            pm2 start npx --name proposal-helper -- next start -p 3005
-            pm2 save
-            cd "$DEPLOY"
-          else
-            echo "proposal-helper not deployed on this server, skipping"
-          fi
-
-          # clear nginx cache
-          find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
-          nginx -s reload
 
           echo "[deploy] done, port=$PORT"
           '
