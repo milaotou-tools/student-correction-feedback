@@ -56,6 +56,8 @@ jobs:
           pm2 delete "$PM2" 2>/dev/null || true
           pm2 save --force
           rm -f /root/.pm2/dump.pm2 2>/dev/null || true
+          pkill -9 -f "/www/wwwroot/student-correction-feedback" 2>/dev/null || true
+          pkill -9 -f "next-server.*3002" 2>/dev/null || true
 
           for i in $(seq 1 15); do
             if ! ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
@@ -86,6 +88,9 @@ jobs:
               'DEEPSEEK_MODEL=deepseek-v4-pro' \
               'TEACHER_PAGE_PASSWORD=dada123' > .env
           fi
+
+          pkill -9 -f "/www/wwwroot/student-correction-feedback" 2>/dev/null || true
+          pkill -9 -f "next-server.*3002" 2>/dev/null || true
 
           npm ci
           npx playwright install-deps chromium 2>/dev/null || true
