@@ -58,13 +58,25 @@ jobs:
           pm2 save --force
           rm -f /root/.pm2/dump.pm2 2>/dev/null || true
 
-          for i in $(seq 1 15); do
+          kill_port_tree() {
+            local listen_pids pid ppid
+            listen_pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
+            for pid in $listen_pids; do
+              while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
+                ppid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+                kill -9 "$pid" 2>/dev/null || true
+                [ -z "$ppid" ] && break
+                [ "$ppid" = "1" ] && break
+                pid="$ppid"
+              done
+            done
+          }
+
+          for i in $(seq 1 20); do
             if ! ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
               break
             fi
-            fuser -k "$PORT/tcp" 2>/dev/null || true
-            fuser -k -6 "$PORT/tcp" 2>/dev/null || true
-            lsof -ti:"$PORT" 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+            kill_port_tree
             sleep 1
           done
 
@@ -87,9 +99,7 @@ jobs:
               'DEEPSEEK_MODEL=deepseek-v4-pro' \
               'TEACHER_PAGE_PASSWORD=dada123' > .env
           fi
-
-          CURRENT_DIR="$(pwd -P)"
-          pkill -9 -f "$CURRENT_DIR" 2>/dev/null || true
+          kill_port_tree
 
           npm ci
           npx playwright install-deps chromium 2>/dev/null || true
