@@ -57,13 +57,21 @@ jobs:
           pm2 save --force
           rm -f /root/.pm2/dump.pm2 2>/dev/null || true
 
-          sleep 2
-          fuser -k "$PORT/tcp" 2>/dev/null || true
-          sleep 1
-          fuser -k -6 "$PORT/tcp" 2>/dev/null || true
-          sleep 1
-          lsof -ti:"$PORT" 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-          sleep 2
+          for i in $(seq 1 15); do
+            if ! ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+              break
+            fi
+            fuser -k "$PORT/tcp" 2>/dev/null || true
+            fuser -k -6 "$PORT/tcp" 2>/dev/null || true
+            lsof -ti:"$PORT" 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+            sleep 1
+          done
+
+          if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+            echo "ERROR: port $PORT is still in use before build"
+            ss -tlnp | grep ":$PORT " || true
+            exit 1
+          fi
 
           cd "$DEPLOY"
           rm -rf .next
@@ -91,10 +99,14 @@ jobs:
           echo "=== pm2 status ==="
           pm2 list
           echo "=== health check ==="
-          curl -s -o /dev/null -w "HTTP %{http_code}" "http://127.0.0.1:$PORT/student-correction-feedback" || true
+          curl -s -o /dev/null -w "HTTP %{http_code}" "http://127.0.0.1:$PORT/" || true
           echo ""
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
+
+          echo "=== clear nginx cache ==="
+          find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
+          nginx -s reload
 
           echo "[deploy] done, port=$PORT"
           '
