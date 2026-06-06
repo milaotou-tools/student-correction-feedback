@@ -1,8 +1,22 @@
-# 课题申报小助手
+# 达达教学工具台
 
-这是一个轻量级网页工具，用于校本研修现场演示，帮助小学教师把模糊课题想法整理成申报书基本框架，并对已有申报书草稿进行问题诊断、逐栏打磨和模拟专家预审。
+这是一个面向小学教师的 Next.js 工具项目，包含：
 
-它不是课题申报平台，不包含账号、后台、权限、材料收集、考核检查或长期流程管理。
+- 订正情况反馈：上传 Excel，生成家长反馈报告和教师跟进清单。
+- 成绩分析报告：分析考试成绩，生成关注名单、奖励名单和家长沟通模板。
+
+课题申报助手已经拆分为独立项目，本仓库中的旧页面和 API 仅作历史兼容，不再作为主要维护入口。
+
+Agent 开发前先读取 `PROJECT_CONTEXT.md`。部署细节见 `DOMAIN_SETUP_HANDOFF.md`。
+
+## 生产地址
+
+- 订正反馈与成绩分析：`https://feedback.we-teach.cn`
+- 课题申报助手：`https://proposal.we-teach.cn`
+- 教育工具入口：`https://we-teach.cn`
+- 个人工具入口：`https://toolou.cn`
+
+独立工具统一使用子域名。不要为新项目默认新增 `/proposal/`、`/feedback/` 之类的跨应用子路径代理。
 
 ## 本地运行
 
@@ -11,49 +25,74 @@ npm install
 npm run dev
 ```
 
-打开：
+项目配置了：
 
 ```text
-http://localhost:3000/student-correction-feedback/proposal-helper
+basePath: 已移除
 ```
 
-## DeepSeek API 配置
+本地默认入口：
 
-在 `.env.local` 中配置：
+```text
+http://localhost:3000/
+```
+
+## 构建与测试
 
 ```bash
-DEEPSEEK_API_KEY=sk-your-deepseek-api-key
+npm run build
+npm test
+```
+
+## 技术栈
+
+- Next.js 15 App Router
+- React 19
+- TypeScript
+- Tailwind CSS
+- Playwright 与 `@sparticuz/chromium`
+- xlsx
+- sharp
+- `@vercel/blob`
+
+## 环境变量
+
+复制 `.env.example` 中的配置到本地环境文件，并填写真实值：
+
+```env
+TEACHER_PAGE_PASSWORD=
+DEEPSEEK_API_KEY=
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-pro
 ```
 
-当前实现使用 DeepSeek 的 OpenAI-compatible `/chat/completions` 接口。也可以使用其他兼容服务，配置以下变量即可：
+也支持其他 OpenAI-compatible 服务：
 
-```bash
-OPENAI_API_KEY=your-api-key
-OPENAI_BASE_URL=https://your-compatible-provider.example.com
-OPENAI_MODEL=your-model
+```env
+OPENAI_API_KEY=
+OPENAI_BASE_URL=
+OPENAI_MODEL=
 ```
 
-`DEEPSEEK_*` 优先级高于 `OPENAI_*`。
+`DEEPSEEK_*` 优先于 `OPENAI_*`。不要提交真实密钥。
 
-## 功能
+## 部署
 
-- 从课题想法生成申报书框架。
-- 对申报书草稿做问题诊断。
-- 按栏目逐栏打磨文本。
-- 生成模拟专家预审意见。
-- 内置 3 个演示样例。
-- 输出结果支持一键复制。
-- 支持 `/api/proposal-helper/health` 检查模型接口配置状态，不返回密钥内容。
+服务器：
 
-## 提示词文件
+```text
+116.62.220.255
+```
 
-提示词集中放在：
+当前生产映射：
 
-- `lib/prompts/generate-framework.ts`
-- `lib/prompts/review-draft.ts`
-- `lib/prompts/polish-section.ts`
-- `lib/prompts/expert-review.ts`
+```text
+feedback.we-teach.cn -> 127.0.0.1:3002
+we-teach.cn -> 127.0.0.1:3002
+toolou.cn -> 127.0.0.1:3002
+proposal.we-teach.cn -> 127.0.0.1:3005
+```
 
-核心原则是：基于教师输入，不虚构学校数据，不编造成果，不写成高校论文腔；信息不足时标注“需用户补充”。
+完整的 DNS、BT Panel、反向代理、SSL 和运维说明见 `DOMAIN_SETUP_HANDOFF.md`。
+
+注意：现有 `.github/workflows/deploy-aliyun.yml` 已改为只部署当前仓库对应的服务，不再自动改写服务器 Nginx。
