@@ -54,38 +54,6 @@ jobs:
           APP_ROOT="/www/wwwroot"
           DEPLOY="$APP_ROOT/$PM2"
 
-          pm2 delete "$PM2" 2>/dev/null || true
-          pm2 save --force
-          rm -f /root/.pm2/dump.pm2 2>/dev/null || true
-
-          kill_port_tree() {
-            local listen_pids pid ppid
-            listen_pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
-            for pid in $listen_pids; do
-              while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
-                ppid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
-                kill -9 "$pid" 2>/dev/null || true
-                [ -z "$ppid" ] && break
-                [ "$ppid" = "1" ] && break
-                pid="$ppid"
-              done
-            done
-          }
-
-          for i in $(seq 1 20); do
-            if ! ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
-              break
-            fi
-            kill_port_tree
-            sleep 1
-          done
-
-          if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
-            echo "ERROR: port $PORT is still in use before build"
-            ss -tlnp | grep ":$PORT " || true
-            exit 1
-          fi
-
           cd "$DEPLOY"
           rm -rf .next
 
@@ -99,14 +67,17 @@ jobs:
               'DEEPSEEK_MODEL=deepseek-v4-pro' \
               'TEACHER_PAGE_PASSWORD=dada123' > .env
           fi
-          kill_port_tree
 
           npm ci
           npx playwright install-deps chromium 2>/dev/null || true
           npx playwright install chromium
           npm run build
 
-          pm2 start npx --name "$PM2" -- next start -p "$PORT"
+          if pm2 describe "$PM2" >/dev/null 2>&1; then
+            pm2 restart "$PM2" --update-env
+          else
+            pm2 start npm --name "$PM2" -- run start -- --port "$PORT"
+          fi
           pm2 save
 
           sleep 5
