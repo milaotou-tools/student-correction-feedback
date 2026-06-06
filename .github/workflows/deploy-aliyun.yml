@@ -89,25 +89,8 @@ jobs:
           echo "=== pm2 logs (last 15 lines) ==="
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
-          echo "=== sync nginx site configs ==="
-          NGINX_DIR="/www/server/panel/vhost/nginx"
-          for SITE in we-teach.cn toolou.cn; do
-            CONF=$(find "$NGINX_DIR" -maxdepth 1 -type f -name "$SITE.conf" -print -quit 2>/dev/null || true)
-            if [ -z "$CONF" ]; then
-              echo "[warn] nginx conf not found for $SITE"
-              continue
-            fi
-            if grep -q "proxy_pass" "$CONF"; then
-              sed -i -E 's#proxy_pass http://127\.0\.0\.1:[0-9]+;#proxy_pass http://127.0.0.1:3002;#g' "$CONF"
-            fi
-            if grep -q "proxy_read_timeout" "$CONF"; then
-              sed -i -E 's/proxy_read_timeout [0-9]+s;/proxy_read_timeout 180s;/g' "$CONF"
-            fi
-          done
-
           echo "=== clear nginx cache ==="
           find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
-          nginx -t
           nginx -s reload
 
           echo "[deploy] done, port=$PORT"

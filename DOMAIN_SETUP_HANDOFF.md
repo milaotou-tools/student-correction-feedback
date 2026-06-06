@@ -6,16 +6,16 @@
 - 管理工具：BT Panel + Nginx + PM2
 - 当前站点：
   - `https://feedback.we-teach.cn` -> `http://127.0.0.1:3002`
-  - `https://we-teach.cn` -> `http://127.0.0.1:3002`
-  - `https://toolou.cn` -> `http://127.0.0.1:3002`
   - `https://proposal.we-teach.cn` -> `http://127.0.0.1:3005`
+  - `https://we-teach.cn` -> 首页代码已准备，待 BT Panel 接线
+  - `https://toolou.cn` -> 首页代码已准备，待 BT Panel 接线
 
 ## 代码现状
 
 - `basePath` 已从 `next.config.ts` 移除
 - 站点根路径 `/` 直接作为生产入口
 - `feedback.we-teach.cn` 不再依赖 `/student-correction-feedback`
-- `we-teach.cn` 与 `toolou.cn` 由同一后端承载，页面内容按 Host 区分
+- `we-teach.cn` 与 `toolou.cn` 的首页代码已按 Host 区分，但生产接线仍待完成
 - `proposal-helper` 仍是独立项目，不在本仓库中维护
 
 ## 部署原则
@@ -25,7 +25,6 @@
 3. GitHub Actions 只负责部署当前仓库对应的服务，不再批量修改服务器 Nginx。
 4. 部署后如果页面没有刷新，优先清理 Nginx proxy cache，再重载 Nginx。
 5. AI 接口响应慢时，保留较长超时，建议 `proxy_read_timeout 180s`。
-6. `we-teach.cn` 与 `toolou.cn` 的站点反代由工作流同步到当前后端端口。
 
 ## PM2 约定
 
