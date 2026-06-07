@@ -9,7 +9,10 @@ type RouteContext = {
 };
 
 export async function POST(request: Request, context: RouteContext) {
-  const configuredPassword = process.env.TEACHER_PAGE_PASSWORD ?? "123456";
+  const configuredPassword = process.env.TEACHER_PAGE_PASSWORD;
+  if (!configuredPassword) {
+    return NextResponse.json({ error: "服务未配置密码" }, { status: 500 });
+  }
 
   const { reportId } = await context.params;
   const body = (await request.json().catch(() => ({}))) as { password?: string };
