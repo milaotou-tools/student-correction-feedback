@@ -81,10 +81,27 @@ proposal.we-teach.cn -> 127.0.0.1:3005
 
 GitHub Actions 最近一次主分支部署已成功。
 
+部署过程中遇到的坑点已记录在 `DOMAIN_SETUP_HANDOFF.md` 的”踩坑记录”里。
+
+### 2026-06-07 安全修复（commit d29cd45）
+
+- **Workflow 硬编码密钥已移除**：`deploy-aliyun.yml` 中的 `DEEPSEEK_API_KEY` 和 `TEACHER_PAGE_PASSWORD` 从明文改为 `${{ secrets.* }}` 引用。
+- **弱密码后备已移除**：`app/api/reports/[reportId]/follow-up/route.ts` 中的 `?? “123456”` 已删除，未配置密码时直接拒绝服务。
+- **⚠️ 仓库级 GitHub Secrets 为空**：本仓库 (`student-correction-feedback`) 未配置任何仓库级 Secrets。部署依赖组织级 Secrets (`milaotou-tools`)。如果组织级也没配 `DEEPSEEK_API_KEY` 和 `TEACHER_PAGE_PASSWORD`，阿里云部署会失败。
+
+### 双部署现状
+
+| | Vercel（达达教学工具台） | 阿里云 (feedback.we-teach.cn) |
+|---|---|---|
+| 环境变量 | Vercel 后台配置 | deploy workflow 写入 .env |
+| API Key | 已换新 key，正常 | 上次 deploy 写入的是已删除的旧 key，**可能已挂** |
+| 恢复方式 | 无需操作 | 确认 GitHub Secrets → 重新 deploy |
+
 ## 待办
 
 - 完成 `we-teach.cn` 和 `toolou.cn` 的 BT Panel 生产接线。
 - 完成 ICP 备案。
+- 确认组织级 GitHub Secrets 包含 `DEEPSEEK_API_KEY`，触发阿里云重新部署。
 
 ## Agent 协作规则
 
