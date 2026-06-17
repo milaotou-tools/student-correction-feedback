@@ -69,10 +69,19 @@ jobs:
             echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
           fi
 
-          if [ -d node_modules ]; then
-            echo "node_modules exists; skip dependency install."
+          if [ -x node_modules/.bin/next ]; then
+            echo "node_modules and next exist; skip dependency install."
           else
-            npm install --no-audit --no-fund --prefer-offline
+            echo "Dependencies are missing; prepare deploy swap and install."
+            if ! swapon --show | grep -q "/swapfile-deploy"; then
+              if [ ! -f /swapfile-deploy ]; then
+                fallocate -l 1G /swapfile-deploy || dd if=/dev/zero of=/swapfile-deploy bs=64M count=16
+                chmod 600 /swapfile-deploy
+                mkswap /swapfile-deploy
+              fi
+              swapon /swapfile-deploy || true
+            fi
+            npm install --no-audit --no-fund --prefer-offline --ignore-scripts
           fi
           npm run build
 
