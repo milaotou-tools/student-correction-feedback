@@ -77,10 +77,28 @@ jobs:
           echo "Standalone bundle extracted."
 
           if [ ! -f .env ]; then
-            echo "DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'" > .env
+            touch .env
+          fi
+
+          if [ -n "$DEEPSEEK_KEY" ]; then
+            if grep -q "^DEEPSEEK_API_KEY=" .env; then
+              sed -i "s|^DEEPSEEK_API_KEY=.*|DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'|" .env
+            else
+              echo "DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'" >> .env
+            fi
+          fi
+          if ! grep -q "^DEEPSEEK_BASE_URL=" .env; then
             echo 'DEEPSEEK_BASE_URL=https://api.deepseek.com' >> .env
+          fi
+          if ! grep -q "^DEEPSEEK_MODEL=" .env; then
             echo 'DEEPSEEK_MODEL=deepseek-v4-pro' >> .env
-            echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
+          fi
+          if [ -n "$TEACHER_PASSWORD" ]; then
+            if grep -q "^TEACHER_PAGE_PASSWORD=" .env; then
+              sed -i "s|^TEACHER_PAGE_PASSWORD=.*|TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'|" .env
+            else
+              echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
+            fi
           fi
 
           if pm2 describe "$PM2" >/dev/null 2>&1; then
