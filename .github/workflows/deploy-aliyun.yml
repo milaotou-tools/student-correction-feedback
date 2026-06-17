@@ -86,6 +86,8 @@ jobs:
           if pm2 describe "$PM2" >/dev/null 2>&1; then
             pm2 delete "$PM2"
           fi
+          fuser -k "$PORT"/tcp 2>/dev/null || true
+          fuser -k -6 "$PORT"/tcp 2>/dev/null || true
           PORT="$PORT" HOSTNAME="127.0.0.1" pm2 start server.js --name "$PM2" --update-env
           pm2 save
 
