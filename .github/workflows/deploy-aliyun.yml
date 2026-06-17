@@ -69,9 +69,7 @@ jobs:
             echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
           fi
 
-          npm ci
-          npx playwright install-deps chromium 2>/dev/null || true
-          npx playwright install chromium
+          npm install --no-audit --no-fund --prefer-offline
           npm run build
 
           if pm2 describe "$PM2" >/dev/null 2>&1; then
