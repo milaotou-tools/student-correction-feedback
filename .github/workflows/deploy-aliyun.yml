@@ -69,7 +69,11 @@ jobs:
             echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
           fi
 
-          npm install --no-audit --no-fund --prefer-offline
+          if [ -d node_modules ]; then
+            echo "node_modules exists; skip dependency install."
+          else
+            npm install --no-audit --no-fund --prefer-offline
+          fi
           npm run build
 
           if pm2 describe "$PM2" >/dev/null 2>&1; then
