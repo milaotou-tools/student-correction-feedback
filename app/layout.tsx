@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "达达教学工具台",
-  description: "一周订正反馈和成绩分析报告，两个功能独立使用。"
+  description: "一周订正反馈、成绩分析报告、课题申报助手和论文标题优化门诊。"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

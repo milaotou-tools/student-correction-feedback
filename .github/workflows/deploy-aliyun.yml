@@ -57,10 +57,10 @@ jobs:
           DEPLOY="$APP_ROOT/$PM2"
 
           cd "$DEPLOY"
-          rm -rf .next
+          echo "Skip deleting .next; next build will refresh build output."
 
           tar -xzf /tmp/deploy.tar.gz
-          rm /tmp/deploy.tar.gz
+          echo "Deploy archive extracted."
 
           if [ ! -f .env ]; then
             echo "DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'" > .env
@@ -91,7 +91,7 @@ jobs:
           pm2 logs "$PM2" --lines 15 --nostream 2>/dev/null || true
 
           echo "=== clear nginx cache ==="
-          find /www/server/nginx/proxy_cache_dir -type f -delete 2>/dev/null || true
+          echo "Skip batch cache deletion; reload nginx only."
           nginx -s reload
 
           echo "[deploy] done, port=$PORT"

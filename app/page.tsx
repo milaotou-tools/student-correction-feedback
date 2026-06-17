@@ -38,6 +38,15 @@ const toolCards: ToolCard[] = [
     label: "进入课题申报助手",
     color: "#22C55E",
   },
+  {
+    badge: "论文标题",
+    title: "标题优化门诊",
+    description:
+      "上传论文 Word，提取大标题和小标题，按专家规则生成改前改后的标题层级对比。",
+    href: "/title-clinic",
+    label: "进入标题优化",
+    color: "#8B5CF6",
+  },
 ];
 
 type Variant = {
@@ -51,7 +60,7 @@ const weTeach: Variant = {
   eyebrow: "Teaching Tools",
   title: "达达教学工具台",
   intro:
-    "面向教学场景的独立工具入口。订正反馈、成绩分析和课题申报助手各自独立，入口统一收敛在这里。",
+    "面向教学场景的独立工具入口。订正反馈、成绩分析、课题申报助手和标题优化门诊各自独立，入口统一收敛在这里。",
   note: "教育工具入口",
 };
 
@@ -81,7 +90,7 @@ function HomeShell({ variant }: { variant: Variant }) {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {toolCards.map((card) => (
             <section
               key={card.href}
