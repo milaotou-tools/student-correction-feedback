@@ -24,6 +24,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Build standalone bundle
+        run: |
+          npm ci
+          npm run build
+          cp -r public .next/standalone/public
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/static
+          cp expert-methodology.md .next/standalone/expert-methodology.md
+          tar -czf /tmp/deploy.tar.gz -C .next/standalone .
+
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -40,7 +56,6 @@ jobs:
         env:
           SSH_PORT: ${{ secrets.ALIYUN_PORT }}
         run: |
-          tar --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.env' -czf /tmp/deploy.tar.gz .
           scp -P "$SSH_PORT" /tmp/deploy.tar.gz "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}:/tmp/deploy.tar.gz"
 
       - name: Build and restart
@@ -57,10 +72,9 @@ jobs:
           DEPLOY="$APP_ROOT/$PM2"
 
           cd "$DEPLOY"
-          echo "Skip deleting .next; next build will refresh build output."
 
           tar -xzf /tmp/deploy.tar.gz
-          echo "Deploy archive extracted."
+          echo "Standalone bundle extracted."
 
           if [ ! -f .env ]; then
             echo "DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'" > .env
@@ -69,30 +83,10 @@ jobs:
             echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
           fi
 
-          if [ -x node_modules/.bin/next ]; then
-            echo "node_modules and next exist; skip dependency install."
-          else
-            echo "Dependencies are missing; prepare deploy swap and install."
-            if ! swapon --show | grep -q "/swapfile-deploy"; then
-              if [ ! -f /swapfile-deploy ]; then
-                fallocate -l 1G /swapfile-deploy || dd if=/dev/zero of=/swapfile-deploy bs=64M count=16
-                chmod 600 /swapfile-deploy
-                mkswap /swapfile-deploy
-              fi
-              swapon /swapfile-deploy || true
-            fi
-            if [ -d node_modules ]; then
-              mv node_modules "node_modules.deploy-backup-$(date +%s)"
-            fi
-            npm install --no-audit --no-fund --prefer-offline --ignore-scripts
-          fi
-          npm run build
-
           if pm2 describe "$PM2" >/dev/null 2>&1; then
-            pm2 restart "$PM2" --update-env
-          else
-            pm2 start npm --name "$PM2" -- run start -- --port "$PORT"
+            pm2 delete "$PM2"
           fi
+          PORT="$PORT" HOSTNAME="127.0.0.1" pm2 start server.js --name "$PM2" --update-env
           pm2 save
 
           sleep 5
