@@ -84,6 +84,7 @@ proposal.we-teach.cn -> 127.0.0.1:3005
   - `POST /api/title-clinic/optimize`
 - 专家规则文件：`expert-methodology.md`
 - 后端通过 `DEEPSEEK_API_KEY` / `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL` 调用模型，不在前端暴露密钥。
+- 阿里云 Nginx 为 `/api/title-clinic/` 配置 300 秒长超时反向代理，避免长文章模型调用被默认代理超时截断成 HTML 错误页。
 
 ## 已知状态
 
