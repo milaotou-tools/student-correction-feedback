@@ -58,8 +58,8 @@ const SYSTEM_PROMPT = `
 - diagnosis 最多 3 条。
 - recommendedTitle 只给 1 个。
 - alternativeTitles 固定 3 个：稳妥投稿型、问题意识型、学术表达型。
-- outlineRevision 必须覆盖用户传来的 outline 每一项，顺序一致，不遗漏。
-- 如果 outline 中包含 id，outlineRevision 每一项必须带回同一个 id；id 只用于前端回填，不要写进标题文本。
+- outlineRevision 优先返回需要修改的标题项；未修改项可以省略，系统会按 id/index 自动回填。若一级标题形成套系需要整体调整，应覆盖所有一级标题。
+- 如果 outlineRevision 中包含某一项，必须带回同一个 id；id 只用于前端回填，不要写进标题文本。
 
 JSON 结构必须是：
 {
@@ -415,7 +415,7 @@ export async function optimizeTitleClinic(input: TitleClinicPayload) {
               fullText: truncateText(input.fullText, 65000),
               outline,
               instruction:
-                "请严格依据专家规则完成标题诊断和标题层级优化。必须通读 fullText。outlineRevision 必须覆盖 outline 每一项，顺序一致，并带回同一 id、index、level、oldText、newText、reason。不要把 id 写进标题文本。"
+                "请严格依据专家规则完成标题诊断和标题层级优化。必须通读 fullText。outlineRevision 只返回需要修改的项，必须带回同一 id、index、level、oldText、newText、reason；未修改项不要返回，系统会按原顺序回填。不要把 id 写进标题文本。"
             })
           }
         ],
