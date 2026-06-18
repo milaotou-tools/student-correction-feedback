@@ -1,4 +1,4 @@
-# 项目共享上下文
+﻿# 项目共享上下文
 
 这份文件是 Codex、Claude 和其他开发 Agent 的项目级单一事实源。
 
@@ -79,11 +79,17 @@ proposal.we-teach.cn -> 127.0.0.1:3005
 ## 标题优化门诊
 
 - 页面入口：`/title-clinic`
-- API：
+- 快速模式 API：
   - `GET /api/title-clinic/health`
   - `POST /api/title-clinic/optimize`
-- 专家规则文件：`expert-methodology.md`
+- 专家深度优化 API：
+  - `POST /api/title-clinic/deep/start`
+  - `GET /api/title-clinic/deep/jobs/[jobId]`
+- 专家规则文件：
+  - `expert-methodology.md`：专家讲座和规则沉淀。
+  - `expert-case-methodology.md`：专家真实改前/改后案例库，是深度模式最高优先级证据。
 - 后端通过 `DEEPSEEK_API_KEY` / `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL` 调用模型，不在前端暴露密钥。
+- 深度模式使用内存任务队列，适合当前阿里云 PM2 单进程部署；如果将来改成多实例/Serverless，需要换成 Redis/数据库队列。
 - 阿里云 Nginx 为 `/api/title-clinic/` 配置 300 秒长超时反向代理，避免长文章模型调用被默认代理超时截断成 HTML 错误页。
 
 ## 已知状态

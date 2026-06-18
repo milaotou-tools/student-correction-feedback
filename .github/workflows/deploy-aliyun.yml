@@ -1,4 +1,4 @@
-name: Deploy to Aliyun (SCP)
+﻿name: Deploy to Aliyun (SCP)
 
 on:
   push:
@@ -38,6 +38,7 @@ jobs:
           mkdir -p .next/standalone/.next
           cp -r .next/static .next/standalone/.next/static
           cp expert-methodology.md .next/standalone/expert-methodology.md
+          cp expert-case-methodology.md .next/standalone/expert-case-methodology.md
           tar -czf /tmp/deploy.tar.gz -C .next/standalone .
 
       - name: Set up SSH agent

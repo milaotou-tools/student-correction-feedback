@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -36,6 +36,15 @@ type OptimizeResult = {
   };
 };
 
+type DeepJobResponse = {
+  jobId: string;
+  status: "queued" | "running" | "completed" | "failed";
+  stage: string;
+  progress: number;
+  result?: OptimizeResult;
+  error?: string;
+};
+
 type HealthStatus = {
   ok: boolean;
   provider: string;
@@ -54,6 +63,7 @@ const loadingSteps = [
   "正在套用专家规则",
   "正在生成新版标题"
 ];
+
 
 const sampleText = `从“完美学霸”到“问题学伴”：AI赋能语文课堂的路径与思考
 一、认知破局：从AI崇拜到工具觉醒
@@ -105,6 +115,7 @@ export function TitleClinicApp() {
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMode, setLoadingMode] = useState<"" | "quick" | "deep">("");
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("等待开始");
   const [health, setHealth] = useState<HealthStatus | null>(null);
@@ -123,7 +134,7 @@ export function TitleClinicApp() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading || loadingMode !== "quick") return;
     const interval = window.setInterval(() => {
       setProgressLabel((current) => {
         const index = loadingSteps.indexOf(current);
@@ -133,7 +144,7 @@ export function TitleClinicApp() {
     }, 1600);
 
     return () => window.clearInterval(interval);
-  }, [isLoading]);
+  }, [isLoading, loadingMode]);
 
   async function checkHealth() {
     setHealthError("");
@@ -211,6 +222,7 @@ export function TitleClinicApp() {
     const nextOutline = input.outline.map((item, index) => ({ ...item, id: `T${index}`, index }));
     setOutline(nextOutline);
     setNewOutline(nextOutline);
+    setLoadingMode("quick");
     setIsLoading(true);
     setProgress(12);
     setProgressLabel("正在解析标题层级");
@@ -235,6 +247,69 @@ export function TitleClinicApp() {
       setStatus(`API 调用失败：${error instanceof Error ? error.message : "未知错误"}`);
     } finally {
       setIsLoading(false);
+      setLoadingMode("");
+    }
+  }
+
+  async function generateDeep() {
+    const input = readInput();
+    const validation = validateInput(input);
+    if (validation) {
+      setStatus(validation);
+      return;
+    }
+
+    const nextOutline = input.outline.map((item, index) => ({ ...item, id: `T${index}`, index }));
+    setOutline(nextOutline);
+    setNewOutline(nextOutline);
+    setLoadingMode("deep");
+    setIsLoading(true);
+    setProgress(6);
+    setProgressLabel("案例方法库对齐");
+    setStatus("专家深度优化已开始。质量优先，通常需要 2-5 分钟，请不要关闭页面。");
+
+    try {
+      const startResponse = await fetch("/api/title-clinic/deep/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...input, outline: nextOutline })
+      });
+      const started = await readJsonResponse<DeepJobResponse & { error?: string }>(startResponse);
+      if (!startResponse.ok || !started.jobId) throw new Error(started.error || "深度优化任务启动失败。");
+
+      const deadline = Date.now() + 8 * 60 * 1000;
+      while (Date.now() < deadline) {
+        await sleep(2200);
+        const jobResponse = await fetch(`/api/title-clinic/deep/jobs/${started.jobId}`, { cache: "no-store" });
+        const job = await readJsonResponse<DeepJobResponse & { error?: string }>(jobResponse);
+        if (!jobResponse.ok) throw new Error(job.error || "深度优化任务查询失败。");
+
+        setProgress(Math.max(1, Math.min(100, Number(job.progress) || 1)));
+        setProgressLabel(job.stage || "专家深度优化中");
+        setStatus(`专家深度优化：${job.stage || "正在处理"}。质量优先，可能需要等待几分钟。`);
+
+        if (job.status === "completed" && job.result) {
+          const normalized = normalizeDisplayedResult(job.result);
+          const built = buildNewOutline(nextOutline, normalized.recommendedTitle || title, normalized.outlineRevision || []);
+          setResult(normalized);
+          setNewOutline(built);
+          setProgress(100);
+          setProgressLabel("专家深度优化完成");
+          setStatus("已完成专家深度优化。红色部分为改动，重点检查一级标题套系是否更连贯。");
+          return;
+        }
+
+        if (job.status === "failed") {
+          throw new Error(job.error || "专家深度优化失败。");
+        }
+      }
+
+      throw new Error("专家深度优化等待超时，请稍后重试。若文章很长，可先用快速模式。");
+    } catch (error) {
+      setStatus(`专家深度优化失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setIsLoading(false);
+      setLoadingMode("");
     }
   }
 
@@ -347,7 +422,15 @@ export function TitleClinicApp() {
                 disabled={isLoading}
                 className="focus-ring h-11 rounded-full bg-[#141413] px-5 text-sm font-extrabold text-white transition hover:bg-[#2A2A28] disabled:cursor-not-allowed disabled:bg-[#D1D5DB]"
               >
-                {isLoading ? "正在改标题..." : "开始改标题"}
+                {isLoading && loadingMode === "quick" ? "正在改标题..." : "开始改标题"}
+              </button>
+              <button
+                type="button"
+                onClick={generateDeep}
+                disabled={isLoading}
+                className="focus-ring h-11 rounded-full bg-[#8B5CF6] px-5 text-sm font-extrabold text-white transition hover:bg-[#7C3AED] disabled:cursor-not-allowed disabled:bg-[#D1D5DB]"
+              >
+                {isLoading && loadingMode === "deep" ? "深度优化中..." : "专家深度优化"}
               </button>
               <button
                 type="button"
@@ -438,6 +521,10 @@ export function TitleClinicApp() {
       </section>
     </main>
   );
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function Field({
