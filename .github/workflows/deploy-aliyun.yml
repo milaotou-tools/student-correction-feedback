@@ -64,12 +64,16 @@ jobs:
           DEEPSEEK_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           TEACHER_PASSWORD: ${{ secrets.TEACHER_PAGE_PASSWORD }}
         run: |
-          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" '
+          DEEPSEEK_KEY_B64="$(printf '%s' "$DEEPSEEK_KEY" | base64 -w 0)"
+          TEACHER_PASSWORD_B64="$(printf '%s' "$TEACHER_PASSWORD" | base64 -w 0)"
+          ssh -p "$SSH_PORT" "${{ secrets.ALIYUN_USER }}@${{ secrets.ALIYUN_HOST }}" "DEEPSEEK_KEY_B64='$DEEPSEEK_KEY_B64' TEACHER_PASSWORD_B64='$TEACHER_PASSWORD_B64' bash -s" <<'REMOTE'
           set -e
           PM2="student-correction-feedback"
           PORT="3002"
           APP_ROOT="/www/wwwroot"
           DEPLOY="$APP_ROOT/$PM2"
+          DEEPSEEK_KEY="$(printf '%s' "$DEEPSEEK_KEY_B64" | base64 -d)"
+          TEACHER_PASSWORD="$(printf '%s' "$TEACHER_PASSWORD_B64" | base64 -d)"
 
           cd "$DEPLOY"
 
@@ -82,9 +86,9 @@ jobs:
 
           if [ -n "$DEEPSEEK_KEY" ]; then
             if grep -q "^DEEPSEEK_API_KEY=" .env; then
-              sed -i "s|^DEEPSEEK_API_KEY=.*|DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'|" .env
+              sed -i "s|^DEEPSEEK_API_KEY=.*|DEEPSEEK_API_KEY=$DEEPSEEK_KEY|" .env
             else
-              echo "DEEPSEEK_API_KEY='"$DEEPSEEK_KEY"'" >> .env
+              echo "DEEPSEEK_API_KEY=$DEEPSEEK_KEY" >> .env
             fi
           fi
           if ! grep -q "^DEEPSEEK_BASE_URL=" .env; then
@@ -95,9 +99,9 @@ jobs:
           fi
           if [ -n "$TEACHER_PASSWORD" ]; then
             if grep -q "^TEACHER_PAGE_PASSWORD=" .env; then
-              sed -i "s|^TEACHER_PAGE_PASSWORD=.*|TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'|" .env
+              sed -i "s|^TEACHER_PAGE_PASSWORD=.*|TEACHER_PAGE_PASSWORD=$TEACHER_PASSWORD|" .env
             else
-              echo "TEACHER_PAGE_PASSWORD='"$TEACHER_PASSWORD"'" >> .env
+              echo "TEACHER_PAGE_PASSWORD=$TEACHER_PASSWORD" >> .env
             fi
           fi
 
@@ -123,4 +127,5 @@ jobs:
           nginx -s reload
 
           echo "[deploy] done, port=$PORT"
-          '
+          REMOTE
+
